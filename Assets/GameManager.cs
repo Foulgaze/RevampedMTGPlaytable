@@ -45,6 +45,13 @@ public class GameManager : MonoBehaviour
         _uuid = System.Guid.NewGuid().ToString();
         _uuidToName = new Dictionary<string, string>();
 
+        for(int i = 0; i < 5; i++)
+        {
+            FileLoader.LazyLoadCSV(_uuidToName, "Assets/cards.csv");
+            _uuidToName = new Dictionary<string, string>();
+        }
+
+
 
     }
 
