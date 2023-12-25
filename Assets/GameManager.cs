@@ -2,7 +2,10 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using TMPro;
-
+using Microsoft.Data.Analysis;
+using System.IO;
+using System;
+using Deedle;
 public class GameManager : MonoBehaviour
 {
     
@@ -45,12 +48,18 @@ public class GameManager : MonoBehaviour
         _uuid = System.Guid.NewGuid().ToString();
         _uuidToName = new Dictionary<string, string>();
 
-        for(int i = 0; i < 5; i++)
-        {
-            FileLoader.LazyLoadCSV(_uuidToName, "Assets/cards.csv");
-            _uuidToName = new Dictionary<string, string>();
-        }
 
+        string filePath = "Assets/cards1.csv";
+
+        var msftRaw = Frame.ReadCsv(filePath);
+        Debug.Log("DONE");
+        // string data = File.ReadAllText(filePath);
+        // DataFrame df = DataFrame.LoadCsvFromString(data);
+
+
+        // Get the elapsed time in milliseconds
+
+        // Display the elapsed time
 
 
     }
@@ -74,7 +83,7 @@ public class GameManager : MonoBehaviour
         if(_networkManager.Connect(_server, textMeshProText.text, _port) != 0)
         {
             // uiManager.spawnErrorMessage("Failed to connect to server\n", errorTimer);
-            Debug.LogError("Failed To Connect To Server");
+            UnityEngine.Debug.LogError("Failed To Connect To Server");
             return;
         }
         uiManager.SwitchToDeckLoad();
