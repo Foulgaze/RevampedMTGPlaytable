@@ -27,4 +27,17 @@ public class HelperFunctions : MonoBehaviour
             list[n] = value;
         }
     }
+
+    public static void KillChildren(Transform t)
+    {
+        if(t == null)
+        {
+            Debug.LogError("Trying to kill null children");
+            return;
+        }
+        foreach(Transform child in t.transform)
+		{
+			GameObject.Destroy(child.gameObject);
+		}
+    }
 }

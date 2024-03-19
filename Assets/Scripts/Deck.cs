@@ -1,68 +1,78 @@
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
-using Unity.VisualScripting;
+using System.Linq;
 using UnityEngine;
 using Debug = UnityEngine.Debug;
-public class Deck : MonoBehaviour
+public class Deck : MonoBehaviour, CardContainer
 {
-    public List<Card> _cards = new List<Card>();
-    public PileController physicalDeck {get;}
+    public Piletype deckID {get;set;}
+    public List<Card> cards = new List<Card>();
+    public PileController physicalDeck {set;get;}
     public bool _revealTopCard {get; set;} = true ;
 
     public Card? DrawCard()
     {
-        if(_cards.Count == 0)
+        if(cards.Count == 0)
         {
             return null;
         }
         
-        Card drawnCard = _cards[_cards.Count - 1];
-        _cards.RemoveAt(_cards.Count - 1);
+        Card drawnCard = cards[cards.Count - 1];
+        cards.RemoveAt(cards.Count - 1);
         UpdatePhysicalDeck();
         return drawnCard;
     }
 
     public void AddCard(Card card)
     {
-        _cards.Add(card);
+        cards.Add(card);
         UpdatePhysicalDeck();
     }
 
-    public bool RemoveCardName(int id) // Work in reverse order to remove card you're probably looking for
+    public bool RemoveCard(Card card) 
     {
-        for(int i = _cards.Count - 1; i > -1; --i)
-        {
-            if(_cards[i].id == id)
-            {
-                _cards.RemoveAt(i);
-                UpdatePhysicalDeck();
-                return true;
-            }
-        }
-        return false;
+        bool removed = cards.Remove(card);
+        UpdatePhysicalDeck();
+        return removed;
     }
 
     
     public void UpdatePhysicalDeck()
     {
-        if(physicalDeck == null)
+        physicalDeck.SetDeck(cards, _revealTopCard);
+    }
+
+    public void AddCardToContainer(Card card, int? position)
+    {
+        int insertPosition = position == null ? cards.Count : (int)position;
+        cards.Insert(insertPosition, card);
+        card.EnableRect();
+        UpdatePhysicalDeck();
+    }
+
+    public DeckDescriptor GetDeckDescription()
+    {
+        int topCard = -1;
+        if(cards.Count != 0)
         {
-            Debug.LogError("Physical Deck is missing");
-            return;
+            topCard = cards[cards.Count - 1].id;
         }
-        physicalDeck.SetCardCount(_cards.Count);
-        if(_cards.Count == 0)
+        return new DeckDescriptor(cards.Count, topCard,(int) deckID, _revealTopCard);
+    }
+
+    public void RemoveCardFromContainer(Card card)
+    {
+        cards.Remove(card);
+        UpdatePhysicalDeck();
+    }
+
+    public void UpdateDeck(DeckDescriptor newDeck)
+    {
+        cards.Clear();
+        for(int i = 0; i < newDeck.cardCount; ++i)
         {
-            return;
-        }
-        if(_revealTopCard)
-        {
-            // physicalDeck.SetTopper(GameManager.Instance._nameToCardInfo[ _cards[_cards.Count - 1]].CardSprite);
-        }
-        else
-        {
-            // physicalDeck.SetTopper(GameManager.Instance._cardBack);
+            // cards.Add(GameManager.Instance.)
         }
     }
 }

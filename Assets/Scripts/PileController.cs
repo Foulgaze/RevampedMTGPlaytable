@@ -13,70 +13,69 @@ public class PileController : MonoBehaviour
     Vector3 _cardPileExtents;
     Vector3 _cardTopperExtents;
     Stack<Transform> _cards = new Stack<Transform>();
-    Sprite _topSprite;
-    int _cardCount = 0;
     void Awake()
     {
         _cardPileExtents = HelperFunctions.GetExtents(transform);
         _cardTopperExtents = HelperFunctions.GetExtents(GameManager.Instance.pileTopper);
 
     }
-    public void SetCardCount(int count)
-    {
-        _cardCount = count;
-        UpdateCardPositions();
-    }
 
-    public void SetTopper(Sprite topSprite)
+    public void SetDeck(List<Card> newCards, bool revealTop)
     {
-        this._topSprite = topSprite;
-        SetTopCardSprite();
+        foreach(Transform physicalCard in _cards)
+        {
+            Destroy(physicalCard.gameObject);
+        }
+        _cards.Clear();
+        for(int i = 0; i < newCards.Count; ++i)
+        {
+            Transform newCard = GenerateNewCard();
+            newCard.position = GetIthCardPosition(i);
+            _cards.Push(newCard);
+        }
+        UpdateTopCard(newCards, revealTop);
     }
-
-    void SetTopCardSprite()
+    public void UpdateTopCard(List<Card> newCards, bool revealTop)
     {
         if(_cards.Count == 0)
         {
             return;
         }
-        Transform topCard = _cards.Peek();
-        Transform canvasObj = topCard.GetChild(0);
-        
-        // Transform imageObj = canvasObj.GetChild(0);
-        // topCard.GetComponent<Renderer>().material = GameManager.Instance._defaultMat;
-        // canvasObj.gameObject.SetActive(true);
-        // imageObj.GetComponent<Image>().sprite = _topSprite;
+        Card card = newCards[newCards.Count - 1];
+        Transform canvasObj = _cards.Peek().GetChild(0);
+        canvasObj.gameObject.SetActive(true);
+        RectTransform cardTopper;
+        if(!revealTop)
+        {
+            cardTopper = Instantiate(GameManager.Instance.cardBack).GetComponent<RectTransform>();
+            card.GetInHandRect().gameObject.SetActive(false);
+        }
+        else
+        {
+            cardTopper = card.GetInHandRect();
+        }
+        cardTopper.SetParent(canvasObj);
+        SetTopperValues(card, cardTopper);
+    }
+
+    void SetTopperValues(Card card, RectTransform cardTopper)
+    {
+        cardTopper.GetComponent<CardMover>().card = card;
+        cardTopper.localPosition = Vector3.zero;
+        cardTopper.localScale = Vector3.one;
+        cardTopper.sizeDelta = Vector2.one;
+        cardTopper.localRotation = Quaternion.identity;
+        cardTopper.gameObject.SetActive(true);
     }
     Transform GenerateNewCard()
     {
-        Transform newCard = GameObject.Instantiate(GameManager.Instance.pileTopper);
+        Transform newCard = Instantiate(GameManager.Instance.pileTopper);
         newCard.GetComponent<Renderer>().material = GameManager.Instance.pilemat;
         newCard.localScale = transform.lossyScale;
         return newCard;
     }
 
-  
 
-    void UpdateCardPositions()
-    {
-        while(_cards.Count > _cardCount)
-        {
-            GameObject.Destroy(_cards.Pop().gameObject);
-        }
-        if(_cards.Count < _cardCount && _cards.Count != 0)
-        {
-            _cards.Peek().GetChild(0).gameObject.SetActive(false); // Disable Previous CardTopper
-        }
-        while(_cards.Count < _cardCount)
-        {
-            Transform newCard = GenerateNewCard();
-            newCard.position = GetIthCardPosition(_cards.Count);
-            _cards.Push(newCard);
-        }
-        SetTopCardSprite();
-        
-        
-    }
     Vector3 GetIthCardPosition(int i)
     {
         return transform.position + new Vector3(0,_cardTopperExtents.y * i * 2f + _cardPileExtents.y*2,0);

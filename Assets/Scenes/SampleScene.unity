@@ -800,15 +800,17 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   _uiManager: {fileID: 651060503}
-  _textureLoader: {fileID: 651060506}
-  _cardBack: {fileID: 21300000, guid: 55dd4e5dff2d1f14fadbb4d7eb319e74, type: 3}
-  _pileTopper: {fileID: 2028856195250915810, guid: e9517e80a0539af418fa02a4aac2625c, type: 3}
-  _pileMat: {fileID: 2100000, guid: 3d14b5c56225e834494cca532136a1d7, type: 2}
-  _defaultMat: {fileID: 2100000, guid: 3541d12a5f72f014f8916edc451052f9, type: 2}
+  textureLoader: {fileID: 651060506}
+  handManager: {fileID: 651060505}
+  _networkManager: {fileID: 651060500}
+  cardBack: {fileID: 4958353534348108663, guid: 6ae3ecf488e02c242afd83e579e2025e, type: 3}
+  pileTopper: {fileID: 2028856195250915810, guid: e9517e80a0539af418fa02a4aac2625c, type: 3}
+  pilemat: {fileID: 2100000, guid: 3d14b5c56225e834494cca532136a1d7, type: 2}
   _boardMovement: {fileID: 651060504}
   _boardPrefab: {fileID: 7314620612561168425, guid: 196cb3506e8130045950d0cb9d159d12, type: 3}
-  _necessaryCardCount: 100
-  _networkManager: {fileID: 651060500}
+  necessaryCardCount: 100
+  cardInHandPrefab: {fileID: 3020864092709489924, guid: 3509b33ce399a7b4bb6630ee9f43fcfc, type: 3}
+  customCardInHandPrefab: {fileID: 7682405528660092856, guid: bc234dda8a28c1f4e8301fef3da7a31d, type: 3}
   _username: 
   _gameStarted: 0
 --- !u!4 &651060502
@@ -871,11 +873,7 @@ MonoBehaviour:
   _handBox: {fileID: 1459457118}
   _handParent: {fileID: 1459457118}
   _checkHandBox: {fileID: 1418022409}
-  _cardInHand: {fileID: 3020864092709489924, guid: 3509b33ce399a7b4bb6630ee9f43fcfc, type: 3}
-  _customCard: {fileID: 7682405528660092856, guid: bc234dda8a28c1f4e8301fef3da7a31d, type: 3}
   _boxExtents: {x: 0, y: 0}
-  debugImage: {fileID: 0}
-  heldCard: {fileID: 0}
 --- !u!114 &651060506
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -888,8 +886,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 8e370bf05f5d708418e2a8e0073373b7, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  cardback: {fileID: 2800000, guid: 55dd4e5dff2d1f14fadbb4d7eb319e74, type: 3}
-  _HandHolder: {fileID: 1459457118}
 --- !u!114 &651060507
 MonoBehaviour:
   m_ObjectHideFlags: 0

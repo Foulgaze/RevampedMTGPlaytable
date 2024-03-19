@@ -1,95 +1,84 @@
 using System.Collections;
 using System.Collections.Generic;
-using Unity.VisualScripting;
 using UnityEngine;
 using UnityEngine.EventSystems;
-public class CardMover : MonoBehaviour, IPointerDownHandler, IPointerUpHandler, IPointerEnterHandler, IPointerExitHandler, IDragHandler
+public class CardMover : MonoBehaviour, IPointerDownHandler, IPointerEnterHandler, IPointerExitHandler
 {
-    RectTransform _rt;
+    public Card card {get;set;}
 
     public CardInfo info;
     float previousYValue;
-    public HandManager _handManager;
-
-    bool isDragging = false;
-    Vector2 offset;
-    [SerializeField]
-    List<Transform> derenderTransforms;
+    public HandManager handManager;
 
     void Start()
     {
-        _rt = transform.GetComponent<RectTransform>();
+        handManager = GameManager.Instance.handManager;
     }
 
     public void OnPointerEnter(PointerEventData eventData)
     {
-        if(_handManager.IsHoldingCard())
+        Debug.Log("Entering Container");
+
+        if(handManager.IsHoldingCard() || !handManager.CardInHand(card))
         {
             return;
         }
         HoverCard();
     }
 
-    void HoverCard()
+    public void HoverCard()
     {
-        previousYValue = _rt.anchoredPosition.y;
-        _rt.anchoredPosition = new Vector2(_rt.anchoredPosition.x,_rt.sizeDelta.y/4 );
+        previousYValue = card.GetInHandRect().anchoredPosition.y;
+        card.GetInHandRect().anchoredPosition = new Vector2(card.GetInHandRect().anchoredPosition.x,card.GetInHandRect().sizeDelta.y/4 );
         transform.SetAsLastSibling();
-        _handManager.UpdateHoverCardPosition(_rt);
+        handManager.UpdateHoverCardPosition(card.GetInHandRect());
     }
     public void OnPointerExit(PointerEventData eventData)
     {
-        if(_handManager.IsHoldingCard())
+        if(handManager.IsHoldingCard() || !handManager.CardInHand(card))
         {
             return;
         }
-        _handManager.UpdateCardPositions();
-        _rt.anchoredPosition = new Vector2(_rt.anchoredPosition.x,previousYValue);
+        handManager.UpdateCardPositions();
+        card.GetInHandRect().anchoredPosition = new Vector2(card.GetInHandRect().anchoredPosition.x,previousYValue);
     }
 
       public void OnPointerDown(PointerEventData eventData)
     {
-        if(_handManager.IsHoldingCard())
+        if(handManager.IsHoldingCard())
         {
             return;
         }
-        isDragging = true;
-        _handManager.DragCard(_rt);
-        offset = eventData.position - (Vector2)transform.position;
+        
+        handManager.BeginCardDrag(card, eventData.position - (Vector2)transform.position);
+ 
 
     }
-    public void OnDrag(PointerEventData eventData)
-    {
-        if (isDragging)
-        {
-            transform.position = eventData.position - offset;
-        }
-    }
 
-    public void OnPointerUp(PointerEventData eventData)
+
+    // public void OnPointerUp(PointerEventData eventData)
+    // {
+    //     Debug.Log("Letting Go!");
+    //     if(!isDragging)
+    //     {
+    //         return;
+    //     }
+    //     isDragging = false;
+    //     handManager.ReleaseCard();
+    //     HoverCard();
+    // }
+
+    public void ReleaseCard()
     {
-        if(!isDragging)
-        {
-            return;
-        }
-        isDragging = false;
-        _handManager.ReleaseCard(_rt);
-        HoverCard();
     }
 
     public void Disable()
     {
-        foreach (Transform child in transform)
-        {
-            child.gameObject.SetActive(false);
-        }
+
     }
     public void Enable()
     {
-        foreach (Transform child in transform)
-        {
-            child.gameObject.SetActive(false);
-        }
+ 
     }
 
 }

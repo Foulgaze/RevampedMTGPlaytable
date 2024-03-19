@@ -11,8 +11,8 @@ GameObject:
   - component: {fileID: 7682405528660092856}
   - component: {fileID: 1930652726745923135}
   - component: {fileID: 9096153501653025052}
-  - component: {fileID: 5919519938453604088}
   - component: {fileID: -7529836520658158170}
+  - component: {fileID: 8346014714989711112}
   m_Layer: 5
   m_Name: GenericCard
   m_TagString: Untagged
@@ -56,7 +56,7 @@ MonoBehaviour:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 668977023903022619}
-  m_Enabled: 0
+  m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: fe87c0e1cc204ed48ad3b37840f39efc, type: 3}
   m_Name: 
@@ -79,23 +79,6 @@ MonoBehaviour:
   m_FillOrigin: 0
   m_UseSpriteMesh: 0
   m_PixelsPerUnitMultiplier: 1
---- !u!114 &5919519938453604088
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 668977023903022619}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 7ea7f59e2c38d9f49ae3cde23242dc79, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  cardName: {fileID: 1700049799440766486}
-  manaCost: {fileID: 3860893805285886470}
-  cardType: {fileID: 1002169737199756541}
-  cardDescription: {fileID: 8937616586405579555}
-  cardImage: {fileID: 4032930519301707501}
 --- !u!114 &-7529836520658158170
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -108,8 +91,24 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: c9258e8320a56dd4c828fb51726f3146, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  _handManager: {fileID: 0}
-  derenderTransforms: []
+  handManager: {fileID: 0}
+--- !u!114 &8346014714989711112
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 668977023903022619}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 01667d42f2b8e1b4fbb5d8fb79d60eaa, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  cardName: {fileID: 1700049799440766486}
+  manaCost: {fileID: 3860893805285886470}
+  cardType: {fileID: 1002169737199756541}
+  cardDescription: {fileID: 8937616586405579555}
+  cardImage: {fileID: 4032930519301707501}
 --- !u!1 &690357109608663043
 GameObject:
   m_ObjectHideFlags: 0

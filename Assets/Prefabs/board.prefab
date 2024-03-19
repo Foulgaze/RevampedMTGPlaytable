@@ -258,17 +258,13 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: f7d0639d776704048b32b9f53d31cc83, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  deck: {fileID: 2777576756661651899}
-  graveyard: {fileID: 5099476094924611004}
-  exile: {fileID: 2060375577394575832}
-  deckPile: {fileID: 186767062875506915}
-  graveyardPile: {fileID: 5259723945797422010}
-  exilePile: {fileID: 8012247967260637828}
-  board: {fileID: 0}
+  physicalLibrary: {fileID: 2777576756661651899}
+  physicalGraveyard: {fileID: 5099476094924611004}
+  physicalExile: {fileID: 2060375577394575832}
   leftField: {fileID: 7166099746608922223}
   rightField: {fileID: 8791713997362013019}
   mainField: {fileID: 716439211284745407}
-  cardBack: {fileID: 0}
+  cardBack: {fileID: 21300000, guid: 55dd4e5dff2d1f14fadbb4d7eb319e74, type: 3}
   isEnemyBoard: 0
 --- !u!1 &3263960598758954309
 GameObject:

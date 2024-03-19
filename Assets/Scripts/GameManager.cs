@@ -7,7 +7,7 @@ using System;
 using Random = UnityEngine.Random;
 public enum NetworkInstruction
 {
-    playerConnection, readyUp, userDisconnect, setLobbySize, chatboxMessage, unReady
+    playerConnection, readyUp, userDisconnect, setLobbySize, chatboxMessage, unReady, updateDecks
 }
 
 public class GameManager : MonoBehaviour
@@ -20,19 +20,23 @@ public class GameManager : MonoBehaviour
     int _readyUpNeeded = 1;
 
     // Player Stuff
-    int _readyUpCount = 0;
+    int readyUpCount = 0;
     public string _uuid {get;  set;}
     int _PID;
     Dictionary<string, string> uuidToName = new Dictionary<string, string>();
+    Dictionary<string, Dictionary<string,int>> uuidToDeckMap = new Dictionary<string, Dictionary<string,int>>();
+    public Dictionary<string, Sprite> nameToSprite = new Dictionary<string, Sprite>();
 
     // CHILDREN
-    [SerializeField]
-    UIManager _uiManager;
-    [SerializeField]
-    TextureLoader _textureLoader;
+    public UIManager _uiManager;
+    public TextureLoader textureLoader;
+    public HandManager handManager;
+
+    [SerializeReference]
+    NetworkManager _networkManager;
 
     // Board Info
-    public Sprite cardBack;
+    public Transform cardBack;
     public Transform pileTopper;
     public Material pilemat;
     [SerializeField]
@@ -53,21 +57,19 @@ public class GameManager : MonoBehaviour
     float _cameraAngle = 70;
     float _cameraZOffset = -2.5f;
 
+    // Prefabs
+    public Transform cardInHandPrefab;
+    public Transform customCardInHandPrefab;
 
 
-
-    // Networking
-    [SerializeReference]
-    NetworkManager _networkManager;
+    
 
     // Game Management
     [HideInInspector]
     public string _username;
 
     public Player clientPlayer;
-    Dictionary<string, Player> _uuidToPlayer = new Dictionary<string, Player>();
-
-    HashSet<string> _spritesToBeLoaded = new HashSet<string>();
+    Dictionary<string, Player> uuidToPlayer = new Dictionary<string, Player>();
 
     public bool _gameStarted = false;
 
@@ -87,16 +89,19 @@ public class GameManager : MonoBehaviour
 
     void FauxGame()
     {
-        Transform prefab = Instantiate(_boardPrefab);
-        BoardComponents components = prefab.GetComponent<BoardComponents>();
-        clientPlayer = new Player("1","Player 1",1,components);
-        _gameStarted = true;
+        // Transform prefab = Instantiate(_boardPrefab);
+        // BoardComponents components = prefab.GetComponent<BoardComponents>();
+        // clientPlayer = new Player("1","Player 1",1,components);
+        // _gameStarted = true;
+        AddUser(_uuid, "Gabe");
+        _readyUpNeeded = 1;
+        ReadyUp(_uuid, "{ \"Plains\": 1, \"Serra Angel\": 1, \"Lightning Bolt\": 1, \"Counterspell\": 1, \"Giant Growth\": 1, \"Llanowar Elves\": 1, \"Doom Blade\": 1, \"Wrath of God\": 1, \"Black Lotus\": 1, \"Birds of Paradise\": 1, \"Lightning Helix\": 1 }");
     }
 
     void Start()
     {
         FileLoader.LoadCSV(nameToCardInfo, "Assets/cards.csv");
-
+        _uuid = System.Guid.NewGuid().ToString();
         FauxGame();
     }
     public void AddUser( string uuid,string name)
@@ -123,7 +128,7 @@ public class GameManager : MonoBehaviour
 
     void CreatePlayerBoards(int PID)
     {
-        List<string> uuids = uuidToName.Values.ToList<string>();
+        List<string> uuids = uuidToName.Keys.ToList<string>();
         uuids.Sort();
         int playerID = 0;
         foreach(string uuid in uuids)
@@ -131,9 +136,13 @@ public class GameManager : MonoBehaviour
             Transform newBoard = GameObject.Instantiate(_boardPrefab);
             BoardComponents components = newBoard.GetComponent<BoardComponents>();
             Player player = new Player(uuid,uuidToName[uuid], playerID++, components);
-            _uuidToPlayer[uuid] = player;
+            uuidToPlayer[uuid] = player;
+            if(uuid == _uuid)
+            {
+                clientPlayer = player;
+            }
         }
-        Transform[] boards = BoardGenerator.ArrangeBoards(_uuidToPlayer, _uuid, new Vector2 (0,20));
+        Transform[] boards = BoardGenerator.ArrangeBoards(uuidToPlayer, _uuid, new Vector2 (0,20));
         _boardMovement.SetValues(boards,clientPlayer.boardScript.transform);
         BoardGenerator.PositionCamera(clientPlayer.boardScript.transform, Camera.main.transform, _cameraHeight, _cameraZOffset,_cameraAngle);
     }
@@ -141,21 +150,26 @@ public class GameManager : MonoBehaviour
 
     void SetupUserDecks()
     {
-        foreach(Player player in _uuidToPlayer.Values)
+        clientPlayer.hand = transform.GetComponent<HandManager>();
+        clientPlayer.hand.SetValues();
+        foreach(Player player in uuidToPlayer.Values)
         {
-            
-            
-            if(player == clientPlayer)
+            Dictionary<string, int> playersDeck = uuidToDeckMap[player.uuid];
+            List<string> totalDeck = new List<string>();
+            foreach(string cardName in playersDeck.Keys)
             {
-                player.hand = transform.GetComponent<HandManager>();
-                player.hand.SetValues();
+                for(int cardAdd = 0; cardAdd < playersDeck[cardName]; ++cardAdd)
+                {
+                    totalDeck.Add(cardName);
+                }
             }
+            CardManager.LoadDeck(totalDeck, player.library);
         }
     }
 
     int GetSeed()
     {
-        List<string> players = _uuidToPlayer.Keys.ToList<string>();
+        List<string> players = uuidToName.Keys.ToList<string>();
         players.Sort();
         int seed = 0;
         foreach(char c in players[0])
@@ -170,29 +184,10 @@ public class GameManager : MonoBehaviour
         _gameStarted = true;
         _uiManager.SwitchToStartGame();
         CreatePlayerBoards(_PID);
-        // LoadClientCards();
         SetupUserDecks();
 
     }
-    
-        
-    void LoadClientCards()
-    {
-        foreach(Player player in _uuidToPlayer.Values)
-        {
-            _spritesToBeLoaded.UnionWith(player.library._cards);
-        }
-        foreach(string spriteName in _spritesToBeLoaded)
-        {
-            if(!nameToCardInfo.ContainsKey(spriteName))
-            {
-                Debug.LogError($"Could not load card ${spriteName}");
-                continue;
-            }
-            UnityEngine.Debug.Log($"{nameToCardInfo[spriteName].name} - {nameToCardInfo[spriteName].setCode} - {nameToCardInfo[spriteName].cardNumber}");
-            StartCoroutine(_textureLoader.GetSprite(nameToCardInfo[spriteName].setCode,nameToCardInfo[spriteName].cardNumber, spriteName));
-        }
-    }
+
 
     public void ConnectToServer(TMP_InputField textMeshProText)
     {
@@ -209,14 +204,13 @@ public class GameManager : MonoBehaviour
 
     public void ReadyUp(string uuid, string deck)
     {
-        Player p = _uuidToPlayer[uuid];
 
-        if(_readyUpCount >= _readyUpNeeded || p == null)
+        if(readyUpCount >= _readyUpNeeded)
             return;
     
-        // p.library = new Deck(JsonConvert.DeserializeObject<Dictionary<string,int>>(deck));
-        _readyUpCount += 1;
-        if(_readyUpCount == _readyUpNeeded)
+        uuidToDeckMap[uuid] = JsonConvert.DeserializeObject<Dictionary<string,int>>(deck);
+        readyUpCount += 1;
+        if(readyUpCount == _readyUpNeeded)
         {
             StartGame();
         }
@@ -224,11 +218,29 @@ public class GameManager : MonoBehaviour
 
     public void UnreadyUp(string uuid)
     {
-        if(!_uuidToPlayer.ContainsKey(uuid))
+        if(!uuidToPlayer.ContainsKey(uuid))
+        {
             return;
-        _uuidToPlayer[uuid].library = null;
-        _readyUpCount -= 1;
+        }
+        uuidToPlayer[uuid].library = null;
+        readyUpCount -= 1;
 
+    }
+
+    public void SendUpdatedDecks()
+    {
+        _networkManager.SendMessage(NetworkInstruction.updateDecks,JsonConvert.SerializeObject(clientPlayer.GetDeckDescriptions()) );
+    }
+    public void UpdateDecks(string uuid, string decks)
+    {
+        if(!uuidToPlayer.ContainsKey(uuid))
+        {
+            Debug.LogError($"Unable to find player {uuid}");
+            return;
+        }
+        Player p = uuidToPlayer[uuid];
+        Dictionary<int, DeckDescriptor> newDecks = JsonConvert.DeserializeObject<Dictionary<int,DeckDescriptor>>(decks);
+        p.UpdateDecks(newDecks);
     }
 
     public bool VerifySubmittedDeck(TMP_InputField textMeshProText)

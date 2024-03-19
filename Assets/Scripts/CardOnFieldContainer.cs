@@ -6,7 +6,7 @@ using UnityEngine.EventSystems;
 public class CardOnFieldContainer : MonoBehaviour
 {
     Deck deck;
-    RectTransform hoveredCard;
+    Card hoveredCard;
 
     public void SetValues(Deck deck)
     {
@@ -15,26 +15,26 @@ public class CardOnFieldContainer : MonoBehaviour
 
     public void EnterMouseOver()
     {
-        Debug.Log("Entered Pile");
         if(GameManager.Instance.clientPlayer.hand.heldCard == null)
         {
             return;
         }
         hoveredCard = GameManager.Instance.clientPlayer.hand.heldCard;
-        hoveredCard.transform.GetComponent<CardMover>().Disable();
-        CardInfo info = hoveredCard.GetComponent<CardMover>().info;
+        deck.AddCardToContainer(hoveredCard, null);
         // deck.AddCard(info.name);
     }
     public void ExitMouseOver()
     {
-        Debug.Log("Exiting!");
-        if(hoveredCard == null)
+        
+        if(GameManager.Instance.clientPlayer.hand.heldCard == null)
         {
             return;
         }
-        CardInfo info = GameManager.Instance.clientPlayer.hand.heldCard.GetComponent<CardMover>().info;
-        deck.RemoveCardName(info.name);
-        hoveredCard.transform.GetComponent<CardMover>().Enable();
+        hoveredCard = GameManager.Instance.clientPlayer.hand.heldCard;
+        deck.RemoveCardFromContainer(this.hoveredCard);
+        RectTransform rt = this.hoveredCard.GetInHandRect();
+        GameManager.Instance.handManager.SetupRectForHand(rt, this.hoveredCard);
+        hoveredCard = null;
 
     }
 }

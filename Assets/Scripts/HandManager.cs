@@ -1,24 +1,20 @@
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
-using Unity.VisualScripting;
 using UnityEngine;
 using UnityEngine.EventSystems;
 using Image = UnityEngine.UI.Image;
-public class HandManager : MonoBehaviour
+
+public class HandManager : MonoBehaviour, CardContainer
 {
-    List<RectTransform> _cardRects = new List<RectTransform>();
+    List<Card> cards = new List<Card>();
 
     [SerializeField]
     RectTransform _handBox;
     [SerializeField]
-    Transform _handParent;
+    public Transform _handParent;
     [SerializeField]
     RectTransform _checkHandBox;
-    [SerializeField]
-    Transform _cardInHand;
-    [SerializeField]
-    Transform _customCard;
     [SerializeField]
     Vector2 _boxExtents = Vector2.zero;
     Vector2 _cardDimensions;
@@ -26,19 +22,10 @@ public class HandManager : MonoBehaviour
     int _cardsPerHand = 5;
     int _cardYPositionFraction = 3;
 
-    [SerializeField]
-    Image debugImage;
-
-    public RectTransform heldCard = null;   
+    public Card heldCard = null;   
+    Vector2 offset;
 
     Transform lastHoveredPile = null;
-
-
-    void Start()
-    {
-
-
-    }
 
     public void SetValues()
     {
@@ -50,117 +37,108 @@ public class HandManager : MonoBehaviour
         
     }
 
+    public bool CardInHand(Card checkCard)
+    {
+        foreach(Card card in cards)
+        {
+            if(checkCard == card)
+            {
+                return true;
+            }
+        }
+        return false;
+    }
+
     public bool IsHoldingCard()
     {
         return heldCard != null;
     }
 
-    public void DragCard(RectTransform newHeldCard)
+    public void BeginCardDrag(Card card, Vector2 offset)
     {
-        Camera c = Camera.main;
-        heldCard = newHeldCard;
-        _cardRects.Remove(newHeldCard);
-        UpdateCardPositions();
-
-        newHeldCard.transform.GetComponent<Image>().raycastTarget = false;
+        bool cardInHand = CardInHand(card);
+        heldCard = card;
+        this.offset = cardInHand ? offset : Vector2.zero;
+        if(cardInHand)
+        {
+            // SetupRectForHand(card.GetInHandRect(), card);
+            RemoveCardFromContainer(card);
+        } 
     }
     
 
-    void AddCardToHand(RectTransform card)
+    void ReleaseCardInHandBox(Card card)
     {
-        for(int i = _cardRects.Count - 1; i > -1; --i)
+        for(int i = cards.Count - 1; i > -1; --i)
         {
-            if(HelperFunctions.IsPointInRectTransform(Input.mousePosition, _cardRects[i], null))
+            if(HelperFunctions.IsPointInRectTransform(Input.mousePosition, cards[i].GetInHandRect(), null))
             {
-                i = Input.mousePosition.x > _cardRects[i].transform.position.x ? i + 1 : i;
-                _cardRects.Insert(Mathf.Max(i,0),card);
-                UpdateCardPositions();
+                i = Input.mousePosition.x > cards[i].GetInHandRect().transform.position.x ? i + 1 : i;
+                AddCardToContainer(card,Mathf.Max(i,0));
                 return;
             }
         }
-        int insertPosition = Input.mousePosition.x < Screen.width/2 ? 0 : _cardRects.Count;
-        _cardRects.Insert(insertPosition,card);
+        int insertPosition = Input.mousePosition.x < Screen.width/2 ? 0 : cards.Count;
+        AddCardToContainer(card,insertPosition);
     }
 
-    public void ReleaseCard(RectTransform rt)
+    public void ReleaseCard()
     {
-        heldCard = null;
         bool inside = HelperFunctions.IsPointInRectTransform(Input.mousePosition, _checkHandBox, null);
         if(inside)
         {
-            AddCardToHand(rt);
+            ReleaseCardInHandBox(heldCard);
+            UpdateCardPositions();
+            heldCard.GetInHandRect().GetComponent<CardMover>().HoverCard();
         }
-        else
+        else if(lastHoveredPile == null)
         {
-            if(lastHoveredPile != null)
-            {
-                Debug.Log("Destroyin");
-                Destroy(rt.transform);
-                lastHoveredPile = null;
-            }
-            else
-            {
-                AddCardToEndOfHand(rt);
-            }
+            AddCardToContainer(heldCard, null);
+            UpdateCardPositions();
         }
-        // UpdateHoverCardPosition(rt);
-        UpdateCardPositions();
+        lastHoveredPile = null;
+        heldCard = null;
+        GameManager.Instance.SendUpdatedDecks();
     }
     
-    public void AddCardToEndOfHand(Transform newCard)
+    public void AddCardToContainer(Card card, int? position)
     {
-
-
-        RectTransform cardRect = newCard.GetComponent<RectTransform>();
-        cardRect.sizeDelta = _cardDimensions;
-        // newCard.GetComponent<Image>().color = new Color(Random.value, Random.value, Random.value);
-        newCard.SetParent(_handParent);
-        newCard.GetComponent<CardMover>()._handManager = this;
-        _cardRects.Add(cardRect);
-        
+        card.currentLocation = this;
+        int inputPosition = position == null ? cards.Count : (int)position;
+        SetupRectForHand(card.GetInHandRect(), card);
+        cards.Insert(inputPosition,card);
         UpdateCardPositions();
     }
 
-    public void CreateAndAddCardToHand(string cardName)
+    public void SetupRectForHand(RectTransform rt, Card card)
     {
-        Transform newCard = Instantiate(_cardInHand);
-        Image image = newCard.GetComponent<Image>();
-        if(!GameManager.Instance.nameToCardInfo.ContainsKey(cardName))
-        {
-            return;
-        }
-        Sprite cardSprite = GameManager.Instance.nameToCardInfo[cardName].GetCardSprite(image);
-        CardInfo info = GameManager.Instance.nameToCardInfo[cardName];
-        if(cardSprite == null)
-        {
-            newCard = Instantiate(_customCard);
-            SetCardValues(info,newCard.GetComponent<CardComponents>());
-        }
-        else
-        {
-            image.sprite = cardSprite;
-        }
-        newCard.GetComponent<CardMover>().info = info;
-        AddCardToEndOfHand(newCard);
+        rt.SetParent(_handParent);
+        rt.GetComponent<CardMover>().card = card;
+        rt.sizeDelta = _cardDimensions;
+        rt.localScale = Vector3.one;
+        rt.localRotation = Quaternion.identity;
+        card.EnableRect();
+    }
+    public void RemoveCardFromContainer(Card card)
+    {
+        card.currentLocation = null;
+        cards.Remove(card);
+        UpdateCardPositions();
     }
 
-    void SetCardValues(CardInfo info, CardComponents components)
-    {
-        components.cardDescription.text = info.text;
-        components.cardName.text = info.name;
-        components.cardType.text = info.type;
-        components.manaCost.text = info.manaCost;
-    }
+
+
 
     public void UpdateCardPositions()
     {
 
-        float distanceBetweenCards = _cardRects.Count <= _cardsPerHand ? _cardDimensions.x : (_boxExtents.x - _cardDimensions.x) / (_cardRects.Count - 1);
-        float startPos = -_cardDimensions.x/2 * (_cardRects.Count-1);
+        float distanceBetweenCards = cards.Count <= _cardsPerHand ? _cardDimensions.x : (_boxExtents.x - _cardDimensions.x) / (cards.Count - 1);
+        float startPos = -_cardDimensions.x/2 * (cards.Count-1);
 
         float currentXPosition = Mathf.Max(-_boxExtents.x/2 + _cardDimensions.x/2, startPos);
-        foreach(RectTransform cardRect in _cardRects)
+        foreach(Card card in cards)
         {
+            RectTransform cardRect = card.GetInHandRect();
             cardRect.anchoredPosition = new Vector2(currentXPosition, -_cardDimensions.y/_cardYPositionFraction);
             currentXPosition += distanceBetweenCards;
         }
@@ -169,74 +147,87 @@ public class HandManager : MonoBehaviour
 
     public void UpdateCardSiblingPositions()
     {
-        for(int i = 0; i < _cardRects.Count; ++i)
+        for(int i = 0; i < cards.Count; ++i)
         {
-            _cardRects[i].SetSiblingIndex(i);
+            cards[i].GetInHandRect().SetSiblingIndex(i);
         }
     }
 
     public void UpdateHoverCardPosition( RectTransform hoverCardRect)
     {
-        if(_cardRects.Count <= _cardsPerHand || hoverCardRect == _cardRects.Last())
+        if(cards.Count <= _cardsPerHand || hoverCardRect == cards.Last().GetInHandRect())
         {
             return;
         }
-        float distanceBetweenCards = _cardRects.Count <= _cardsPerHand ? _cardDimensions.x : (_boxExtents.x - _cardDimensions.x * 2) / (_cardRects.Count - 2);
-        float startPos = -_cardDimensions.x/2 * (_cardRects.Count-1);
+        float distanceBetweenCards = cards.Count <= _cardsPerHand ? _cardDimensions.x : (_boxExtents.x - _cardDimensions.x * 2) / (cards.Count - 2);
+        float startPos = -_cardDimensions.x/2 * (cards.Count-1);
 
         float currentXPosition = Mathf.Max(-_boxExtents.x/2 + _cardDimensions.x/2, startPos);
-        foreach(RectTransform cardRect in _cardRects)
+        foreach(Card card in cards)
         {
-            
+            RectTransform cardRect = card.GetInHandRect();
             cardRect.anchoredPosition = new Vector2(currentXPosition, cardRect.anchoredPosition.y);
             currentXPosition += cardRect == hoverCardRect ? _cardDimensions.x : distanceBetweenCards;
         }
     }
 
+    void DragCard()
+    {
+        if(lastHoveredPile != null)
+        {
+            return;
+        }
+        heldCard.GetInHandRect().transform.position = (Vector2) Input.mousePosition - offset;
+    }
+
+    bool IsDraggingCard()
+    {
+        return heldCard != null && Input.GetMouseButton(0);
+    }
+
+    bool IsReleasingCard()
+    {
+        return heldCard != null && !Input.GetMouseButton(0);
+    }
+
 
     void Update()
     {    
+        if(IsReleasingCard())
+        {
+            ReleaseCard();
+        }
+
+        if(IsDraggingCard())
+        {
+            DragCard();
+        }
+
+        CheckForPile();
+
+        
     }
 
     void CheckForPile()
     {
-        if(heldCard == null)
-        {
-            if(lastHoveredPile != null)
-            {
-                lastHoveredPile.GetComponent<CardOnFieldContainer>().ExitMouseOver();
-                lastHoveredPile = null;
-            }
-            return;
-        }
         Transform pile = RaycastForPile();
-        if(pile == null)
-        {
-            if(lastHoveredPile != null)
-            {
-                lastHoveredPile.GetComponent<CardOnFieldContainer>().ExitMouseOver();
-                lastHoveredPile = null;
-            }
-        }
         if(lastHoveredPile == pile)
         {
             return;
         }
-        CardOnFieldContainer container = pile.GetComponent<CardOnFieldContainer>();
-        if(lastHoveredPile == null)
+        if(lastHoveredPile != null &&  pile == null)
         {
-            Debug.Log("Setting Pile");
-            container.EnterMouseOver();
-            lastHoveredPile = pile;
+            lastHoveredPile.GetComponent<CardOnFieldContainer>().ExitMouseOver();
+            lastHoveredPile = null;
             return;
         }
-        
-        lastHoveredPile.GetComponent<CardOnFieldContainer>().ExitMouseOver();
-        container.EnterMouseOver();
+        CardOnFieldContainer container = pile.GetComponent<CardOnFieldContainer>();
         lastHoveredPile = pile;
-        return;
-
-
+        if(lastHoveredPile != null)
+        {
+            lastHoveredPile.GetComponent<CardOnFieldContainer>().ExitMouseOver();
+        }
+        container.EnterMouseOver();
     }
 
     Transform RaycastForPile()
@@ -259,7 +250,6 @@ public class HandManager : MonoBehaviour
 
     void FixedUpdate()
     {
-        CheckForPile();
         
     }
 }
