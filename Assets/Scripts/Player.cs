@@ -28,21 +28,24 @@ public class Player
         this.library = boardScript.library;
         this.library._revealTopCard = false;
         this.library.deckID = Piletype.library;
+        this.library.owner = id;
 		this.exile = boardScript.exile;
         this.exile.deckID = Piletype.exile;
+        this.exile.owner = id;
 		this.graveyard = boardScript.graveyard;
 		this.graveyard.deckID = Piletype.graveyard;
+        this.graveyard.owner = id;
     }
 
-    public void DrawCard()
+    public bool DrawCard()
     {
         Card? drawnCard = library.DrawCard();
         if(drawnCard == null)
         {
-            return;
+            return false;
         }
         hand.AddCardToContainer(drawnCard, null);
-        // hand.CreateAndAddCardToHand(drawnCard);
+        return true;
     }
 
     public Dictionary<int, DeckDescriptor> GetDeckDescriptions()

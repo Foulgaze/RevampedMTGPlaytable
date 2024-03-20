@@ -52,5 +52,5 @@
         "Temp/": true
     },
     "dotnet.preferCSharpExtension": true,
-    "dotnet.defaultSolution": "PlaytableForReal.sln"
+    "dotnet.defaultSolution": "Final Playtable.sln"
 }

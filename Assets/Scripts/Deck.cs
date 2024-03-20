@@ -9,6 +9,8 @@ public class Deck : MonoBehaviour, CardContainer
     public Piletype deckID {get;set;}
     public List<Card> cards = new List<Card>();
     public PileController physicalDeck {set;get;}
+
+    public int owner {get;set;}
     public bool _revealTopCard {get; set;} = true ;
 
     public Card? DrawCard()
@@ -67,12 +69,25 @@ public class Deck : MonoBehaviour, CardContainer
         UpdatePhysicalDeck();
     }
 
+    public int GetOwner()
+    {
+        return owner;
+    }
+
     public void UpdateDeck(DeckDescriptor newDeck)
     {
         cards.Clear();
-        for(int i = 0; i < newDeck.cardCount; ++i)
+        
+        for(int i = 0; i < newDeck.cardCount - 1; ++i)
         {
-            // cards.Add(GameManager.Instance.)
+            cards.Add(null);
         }
+        if(newDeck.cardCount != 0)
+        {
+            cards.Add(GameManager.Instance.idToCard[newDeck.topCard]);
+        }
+        _revealTopCard = newDeck.revealTop;
+        UpdatePhysicalDeck();
+
     }
 }

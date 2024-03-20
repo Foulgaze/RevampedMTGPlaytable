@@ -23,7 +23,7 @@ public class HandManager : MonoBehaviour, CardContainer
     int _cardYPositionFraction = 3;
 
     public Card heldCard = null;   
-    Vector2 offset;
+    public Vector2 offset;
 
     Transform lastHoveredPile = null;
 
@@ -33,8 +33,6 @@ public class HandManager : MonoBehaviour, CardContainer
         _cardDimensions = new Vector2(_boxExtents.x/_cardsPerHand, _boxExtents.x/_cardsPerHand * _cardRatio );
         _checkHandBox.sizeDelta = new Vector2(_boxExtents.x,_cardDimensions.y);
         _checkHandBox.transform.position = new Vector3(_handBox.transform.position.x,_handBox.transform.position.y -_cardDimensions.y/_cardYPositionFraction,0);
-
-        
     }
 
     public bool CardInHand(Card checkCard)
@@ -117,6 +115,7 @@ public class HandManager : MonoBehaviour, CardContainer
         rt.sizeDelta = _cardDimensions;
         rt.localScale = Vector3.one;
         rt.localRotation = Quaternion.identity;
+        rt.transform.position = (Vector2) Input.mousePosition - offset;
         card.EnableRect();
     }
     public void RemoveCardFromContainer(Card card)
@@ -124,6 +123,11 @@ public class HandManager : MonoBehaviour, CardContainer
         card.currentLocation = null;
         cards.Remove(card);
         UpdateCardPositions();
+    }
+
+    public int GetOwner()
+    {
+        return GameManager.Instance.clientPlayer.id;
     }
 
 
@@ -215,19 +219,17 @@ public class HandManager : MonoBehaviour, CardContainer
         {
             return;
         }
-        if(lastHoveredPile != null &&  pile == null)
-        {
-            lastHoveredPile.GetComponent<CardOnFieldContainer>().ExitMouseOver();
-            lastHoveredPile = null;
-            return;
-        }
-        CardOnFieldContainer container = pile.GetComponent<CardOnFieldContainer>();
-        lastHoveredPile = pile;
         if(lastHoveredPile != null)
         {
             lastHoveredPile.GetComponent<CardOnFieldContainer>().ExitMouseOver();
         }
-        container.EnterMouseOver();
+        if(pile == null || pile.GetComponent<CardOnFieldContainer>().deck.GetOwner() != GetOwner())
+        {
+            lastHoveredPile = null;
+            return;
+        }
+        lastHoveredPile = pile;
+        pile.GetComponent<CardOnFieldContainer>().EnterMouseOver();
     }
 
     Transform RaycastForPile()

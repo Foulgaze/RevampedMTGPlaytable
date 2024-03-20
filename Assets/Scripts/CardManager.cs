@@ -26,6 +26,7 @@ public class CardManager : MonoBehaviour
             return null;
         }
         Card newCard = new Card(cardID++,GameManager.Instance.nameToCardInfo[cardName], GameManager.Instance);
+        GameManager.Instance.idToCard[newCard.id] = newCard;
         return newCard;
     }
 }

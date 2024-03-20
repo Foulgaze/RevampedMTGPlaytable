@@ -72,6 +72,13 @@ public class NetworkCommandHandler
                 // chatbox.AddMessage($"{gameManager.readyCount}/{gameManager.lobbySize} users ready.");
                 break;
             }
+            case (int) NetworkInstruction.updateDecks: // This is when a user readies up
+            {
+                GameManager.Instance.UpdateDecks(msgUUID,instruction);
+                // chatbox.AddMessage($"{gameManager.getUsername(uuid)} is ready.");
+                // chatbox.AddMessage($"{gameManager.readyCount}/{gameManager.lobbySize} users ready.");
+                break;
+            }
             // case 2: // This is when a user disconnects to the server
             // {
             //     gameManager.RemoveUser(uuid);

@@ -5,6 +5,7 @@ using Newtonsoft.Json;
 using System.Linq;
 using System;
 using Random = UnityEngine.Random;
+using System.Collections;
 public enum NetworkInstruction
 {
     playerConnection, readyUp, userDisconnect, setLobbySize, chatboxMessage, unReady, updateDecks
@@ -17,7 +18,7 @@ public class GameManager : MonoBehaviour
     // Should be defined outside of file
     const string _server = "127.0.0.1";
     const int _port = 54000;
-    int _readyUpNeeded = 1;
+    int _readyUpNeeded = 2;
 
     // Player Stuff
     int readyUpCount = 0;
@@ -70,8 +71,12 @@ public class GameManager : MonoBehaviour
 
     public Player clientPlayer;
     Dictionary<string, Player> uuidToPlayer = new Dictionary<string, Player>();
+    public Dictionary<int, Card> idToCard = new Dictionary<int, Card>();
 
     public bool _gameStarted = false;
+
+    [HideInInspector]
+    public bool singlePlayer = false;
 
 
     private void Awake() 
@@ -89,10 +94,7 @@ public class GameManager : MonoBehaviour
 
     void FauxGame()
     {
-        // Transform prefab = Instantiate(_boardPrefab);
-        // BoardComponents components = prefab.GetComponent<BoardComponents>();
-        // clientPlayer = new Player("1","Player 1",1,components);
-        // _gameStarted = true;
+        _readyUpNeeded = 1;
         AddUser(_uuid, "Gabe");
         _readyUpNeeded = 1;
         ReadyUp(_uuid, "{ \"Plains\": 1, \"Serra Angel\": 1, \"Lightning Bolt\": 1, \"Counterspell\": 1, \"Giant Growth\": 1, \"Llanowar Elves\": 1, \"Doom Blade\": 1, \"Wrath of God\": 1, \"Black Lotus\": 1, \"Birds of Paradise\": 1, \"Lightning Helix\": 1 }");
@@ -100,8 +102,23 @@ public class GameManager : MonoBehaviour
 
     void Start()
     {
+        Debug.developerConsoleVisible = true;
         FileLoader.LoadCSV(nameToCardInfo, "Assets/cards.csv");
         _uuid = System.Guid.NewGuid().ToString();
+        if(singlePlayer)
+        {
+            StartCoroutine(DelayedStart());
+        }
+        else
+        {
+            _uiManager.SwitchToConnect();
+        }
+    }
+
+    IEnumerator DelayedStart()
+    {
+        yield return null; // Wait for one frame
+
         FauxGame();
     }
     public void AddUser( string uuid,string name)
@@ -152,8 +169,11 @@ public class GameManager : MonoBehaviour
     {
         clientPlayer.hand = transform.GetComponent<HandManager>();
         clientPlayer.hand.SetValues();
-        foreach(Player player in uuidToPlayer.Values)
+        List<string> playersIDs = uuidToPlayer.Keys.ToList<string>();
+        playersIDs.Sort();
+        foreach(string playerID in playersIDs)
         {
+            Player player = uuidToPlayer[playerID];
             Dictionary<string, int> playersDeck = uuidToDeckMap[player.uuid];
             List<string> totalDeck = new List<string>();
             foreach(string cardName in playersDeck.Keys)
@@ -239,6 +259,10 @@ public class GameManager : MonoBehaviour
             return;
         }
         Player p = uuidToPlayer[uuid];
+        if(p == clientPlayer)
+        {
+            return; // Skip client
+        }
         Dictionary<int, DeckDescriptor> newDecks = JsonConvert.DeserializeObject<Dictionary<int,DeckDescriptor>>(decks);
         p.UpdateDecks(newDecks);
     }
