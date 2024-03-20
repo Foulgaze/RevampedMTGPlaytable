@@ -5,7 +5,7 @@ using UnityEngine.EventSystems;
  
 public class CardOnFieldContainer : MonoBehaviour
 {
-    Deck deck;
+    public Deck deck;
     Card hoveredCard;
 
     public void SetValues(Deck deck)
@@ -15,7 +15,7 @@ public class CardOnFieldContainer : MonoBehaviour
 
     public void EnterMouseOver()
     {
-        if(GameManager.Instance.clientPlayer.hand.heldCard == null)
+        if(GameManager.Instance.clientPlayer.hand.heldCard == null || GameManager.Instance.clientPlayer.id != deck.owner)
         {
             return;
         }
@@ -26,7 +26,7 @@ public class CardOnFieldContainer : MonoBehaviour
     public void ExitMouseOver()
     {
         
-        if(GameManager.Instance.clientPlayer.hand.heldCard == null)
+        if(GameManager.Instance.clientPlayer.hand.heldCard == null || GameManager.Instance.clientPlayer.id != deck.owner)
         {
             return;
         }

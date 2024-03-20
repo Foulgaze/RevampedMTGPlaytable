@@ -13,9 +13,16 @@ public class PlayerController : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
+        if(!GameManager.Instance._gameStarted)
+        {
+            return;
+        }
         if((Input.GetKey(KeyCode.LeftControl) || Input.GetKey(KeyCode.RightControl)) && Input.GetKeyDown(KeyCode.D) && GameManager.Instance._gameStarted)
         {
-            GameManager.Instance.clientPlayer.DrawCard();
+            if(GameManager.Instance.clientPlayer.DrawCard())
+            {
+                GameManager.Instance.SendUpdatedDecks();
+            }
         }
     }
 }

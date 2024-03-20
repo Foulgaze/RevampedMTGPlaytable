@@ -55,6 +55,10 @@ public class NetworkManager : MonoBehaviour
 
     public void SendMessage(NetworkInstruction networkInstruction,string payload = "",string serverOpCode = "01") // Sends a message to the server. The send format is {uuid opcode message} The spaces are not present 
     {
+        if(GameManager.Instance.singlePlayer)
+        {
+            return;
+        }
         string message = $"{GameManager.Instance._uuid}|{serverOpCode}|{(int)networkInstruction:D2}|{payload}";
         byte[] data = System.Text.Encoding.UTF8.GetBytes(AddMessageSize(message));
         rwStream.Write(data, 0, data.Length);
