@@ -48,7 +48,8 @@ public class PileController : MonoBehaviour
         if(!revealTop)
         {
             cardTopper = Instantiate(GameManager.Instance.cardBack).GetComponent<RectTransform>();
-            card.GetInHandRect().gameObject.SetActive(false);
+            cardTopper.GetComponent<CardMover>().card = card;
+            card.DisableRect();
         }
         else
         {
@@ -60,7 +61,7 @@ public class PileController : MonoBehaviour
 
     void SetTopperValues(Card card, RectTransform cardTopper)
     {
-        cardTopper.GetComponent<CardMover>().card = card;
+        
         cardTopper.localPosition = Vector3.zero;
         cardTopper.localScale = Vector3.one;
         cardTopper.sizeDelta = Vector2.one;

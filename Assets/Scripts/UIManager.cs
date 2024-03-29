@@ -6,6 +6,8 @@ using UnityEngine;
 public class UIManager : MonoBehaviour
 {
     [SerializeField]
+    GameObject boxHolder;
+    [SerializeField]
     GameObject connectMenu;
     [SerializeField]
     GameObject deckLoadMenu;
@@ -19,11 +21,33 @@ public class UIManager : MonoBehaviour
     [SerializeField]
     TMP_InputField deckLoad;
 
+    [SerializeField]
+    Transform rightClickMenu;
+
+    [SerializeField]
+    Transform drawCardBox;
+
+    [SerializeField]
+    public Transform libraryHolder;
+    
+
+    public Deck currentSelectedDeck;
+
+
     bool ready = false;
 
 
     
-
+    void Update()
+    {
+        if((Input.GetMouseButtonDown(0) || Input.GetMouseButtonDown(1)) && rightClickMenu.gameObject.activeSelf) // Technically should cache rt perhaps and cam main
+        {
+            if(!RectTransformUtility.RectangleContainsScreenPoint(rightClickMenu.GetComponent<RectTransform>(), Input.mousePosition))
+            {
+                rightClickMenu.gameObject.SetActive(false);
+            }
+        }
+    }
     void Awake()
     {
         connectMenu.SetActive(false);
@@ -67,6 +91,40 @@ public class UIManager : MonoBehaviour
         deckLoad.interactable = true;
 
     }
+
+
+    public void EnableDrawCardsBox()
+    {
+        GameManager.Instance.gameInteractable = false;
+        drawCardBox.gameObject.SetActive(true);
+    }
+
+    public void DisableDrawCardsBox()
+    {
+        GameManager.Instance.gameInteractable = true;
+        drawCardBox.gameObject.SetActive(false);
+    }
+
+    public void EnableRightClickMenu(Deck deck)
+    {
+        currentSelectedDeck = deck;
+        rightClickMenu.gameObject.SetActive(true);
+        RectTransform menu = rightClickMenu.GetComponent<RectTransform>();
+        menu.position = Input.mousePosition + new Vector3(menu.sizeDelta.x/2,menu.sizeDelta.y/2 ,0);
+    }
+
+    public void DisableRightClickMenu()
+    {
+        rightClickMenu.gameObject.SetActive(false);
+    }
+
+    public Transform ShowLibrary()
+    {
+        libraryHolder.gameObject.SetActive(true);
+        return libraryHolder;
+    }
+
+
 
     private IEnumerator DisplayErrorMessageForSeconds(float enableTime)
     {

@@ -6,9 +6,8 @@ public class CardMover : MonoBehaviour, IPointerDownHandler, IPointerEnterHandle
 {
     public Card card {get;set;}
 
-    public CardInfo info;
     float previousYValue;
-    public HandManager handManager;
+    HandManager handManager;
 
     void Start()
     {
@@ -17,9 +16,8 @@ public class CardMover : MonoBehaviour, IPointerDownHandler, IPointerEnterHandle
 
     public void OnPointerEnter(PointerEventData eventData)
     {
-        Debug.Log("Entering Container");
 
-        if(handManager.IsHoldingCard() || !handManager.CardInHand(card))
+        if(handManager.IsHoldingCard() || !handManager.CardInHand(card) || !GameManager.Instance.gameInteractable)
         {
             return;
         }
@@ -35,7 +33,7 @@ public class CardMover : MonoBehaviour, IPointerDownHandler, IPointerEnterHandle
     }
     public void OnPointerExit(PointerEventData eventData)
     {
-        if(handManager.IsHoldingCard() || !handManager.CardInHand(card))
+        if(handManager.IsHoldingCard() || !handManager.CardInHand(card) || !GameManager.Instance.gameInteractable)
         {
             return;
         }
@@ -45,7 +43,7 @@ public class CardMover : MonoBehaviour, IPointerDownHandler, IPointerEnterHandle
 
       public void OnPointerDown(PointerEventData eventData)
     {
-        if(handManager.IsHoldingCard())
+        if(handManager.IsHoldingCard() || !GameManager.Instance.gameInteractable || eventData.button != PointerEventData.InputButton.Left)
         {
             return;
         }

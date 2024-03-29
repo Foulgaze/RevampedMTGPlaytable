@@ -131,6 +131,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 71acfe9c9aed1704aa55aae112d2ead1, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  deck: {fileID: 0}
 --- !u!1 &3074322914172508945
 GameObject:
   m_ObjectHideFlags: 0
@@ -261,6 +262,9 @@ MonoBehaviour:
   physicalLibrary: {fileID: 2777576756661651899}
   physicalGraveyard: {fileID: 5099476094924611004}
   physicalExile: {fileID: 2060375577394575832}
+  library: {fileID: 0}
+  graveyard: {fileID: 0}
+  exile: {fileID: 0}
   leftField: {fileID: 7166099746608922223}
   rightField: {fileID: 8791713997362013019}
   mainField: {fileID: 716439211284745407}
@@ -579,6 +583,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 71acfe9c9aed1704aa55aae112d2ead1, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  deck: {fileID: 0}
 --- !u!1 &5405006333357450859
 GameObject:
   m_ObjectHideFlags: 0
@@ -710,6 +715,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 71acfe9c9aed1704aa55aae112d2ead1, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  deck: {fileID: 0}
 --- !u!1 &6442393484357437465
 GameObject:
   m_ObjectHideFlags: 0
@@ -826,7 +832,8 @@ GameObject:
   - component: {fileID: 1444961051698187285}
   - component: {fileID: 9051402301964646121}
   - component: {fileID: 4622343446760496239}
-  m_Layer: 6
+  - component: {fileID: 8912938377433323292}
+  m_Layer: 3
   m_Name: leftField
   m_TagString: GameController
   m_Icon: {fileID: 0}
@@ -929,6 +936,18 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 883865a9425ca4e418904cf54f5ad133, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+--- !u!114 &8912938377433323292
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7982246361027224800}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 3087b1570c30d0b45b093d2c29a284fe, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
 --- !u!1 &8144744820707483879
@@ -1049,7 +1068,8 @@ GameObject:
   - component: {fileID: 5872094365335452877}
   - component: {fileID: 2535917404421784661}
   - component: {fileID: 5312766047415078273}
-  m_Layer: 6
+  - component: {fileID: 2287164296128821935}
+  m_Layer: 3
   m_Name: rightField
   m_TagString: GameController
   m_Icon: {fileID: 0}
@@ -1154,6 +1174,18 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 883865a9425ca4e418904cf54f5ad133, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+--- !u!114 &2287164296128821935
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8808791055467851745}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 3087b1570c30d0b45b093d2c29a284fe, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!1 &8909722965849787843
 GameObject:
   m_ObjectHideFlags: 0
@@ -1167,7 +1199,8 @@ GameObject:
   - component: {fileID: 3354105241170271161}
   - component: {fileID: 2650953327490039753}
   - component: {fileID: 8300587054841356867}
-  m_Layer: 6
+  - component: {fileID: 8634948638225979104}
+  m_Layer: 3
   m_Name: topField
   m_TagString: GameController
   m_Icon: {fileID: 0}
@@ -1270,6 +1303,18 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 883865a9425ca4e418904cf54f5ad133, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+--- !u!114 &8634948638225979104
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8909722965849787843}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 3087b1570c30d0b45b093d2c29a284fe, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
 --- !u!1 &8951085611307698949

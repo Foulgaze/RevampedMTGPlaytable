@@ -17,6 +17,12 @@ public class HandManager : MonoBehaviour, CardContainer
     RectTransform _checkHandBox;
     [SerializeField]
     Vector2 _boxExtents = Vector2.zero;
+
+    [SerializeField]
+    PileCardDisplay pileCardDisplay;
+
+    [SerializeField]
+    RectTransform pileViewBox;
     Vector2 _cardDimensions;
     float _cardRatio = 7f/5f;
     int _cardsPerHand = 5;
@@ -25,7 +31,11 @@ public class HandManager : MonoBehaviour, CardContainer
     public Card heldCard = null;   
     public Vector2 offset;
 
+    public Vector3 lastHitPosition;
+
     Transform lastHoveredPile = null;
+
+    bool inLibraryView = false;
 
     public void SetValues()
     {
@@ -52,6 +62,11 @@ public class HandManager : MonoBehaviour, CardContainer
         return heldCard != null;
     }
 
+    bool CardInLibraryView()
+    {
+        return RectTransformUtility.RectangleContainsScreenPoint(pileViewBox, Input.mousePosition);
+    }
+
     public void BeginCardDrag(Card card, Vector2 offset)
     {
         bool cardInHand = CardInHand(card);
@@ -59,13 +74,27 @@ public class HandManager : MonoBehaviour, CardContainer
         this.offset = cardInHand ? offset : Vector2.zero;
         if(cardInHand)
         {
-            // SetupRectForHand(card.GetInHandRect(), card);
             RemoveCardFromContainer(card);
         } 
+        else if(CardInLibraryView())
+        {
+            LibraryBoxController controller = GameManager.Instance._uiManager.libraryHolder.GetComponent<LibraryBoxController>();
+            controller.currentDeck.RemoveCardFromContainer(card);
+            card.GetInHandRect().SetParent(_handParent);
+            inLibraryView = true;
+        }
+        else if(lastHoveredPile != null)
+        {
+            CardContainer container =  lastHoveredPile.GetComponent<CardContainer>();
+            if(container != null)
+            {
+                container.RemoveCardFromContainer(card);
+            }
+        }
     }
     
 
-    void ReleaseCardInHandBox(Card card)
+    public void ReleaseCardInBox(Card card)
     {
         for(int i = cards.Count - 1; i > -1; --i)
         {
@@ -85,16 +114,30 @@ public class HandManager : MonoBehaviour, CardContainer
         bool inside = HelperFunctions.IsPointInRectTransform(Input.mousePosition, _checkHandBox, null);
         if(inside)
         {
-            ReleaseCardInHandBox(heldCard);
+            ReleaseCardInBox(heldCard);
             UpdateCardPositions();
             heldCard.GetInHandRect().GetComponent<CardMover>().HoverCard();
+        }
+        else if(inLibraryView)
+        {
+            pileCardDisplay.libraryController.AddCardToContainer(heldCard, null);
         }
         else if(lastHoveredPile == null)
         {
             AddCardToContainer(heldCard, null);
             UpdateCardPositions();
         }
+        else
+        {
+            CardContainer container = lastHoveredPile.GetComponent<CardContainer>();
+            if(container != null)
+            {
+                container.ReleaseCardInBox(heldCard);
+            }
+        }
+        Debug.Log("releasing Card");
         lastHoveredPile = null;
+        inLibraryView = false;
         heldCard = null;
         GameManager.Instance.SendUpdatedDecks();
     }
@@ -111,7 +154,6 @@ public class HandManager : MonoBehaviour, CardContainer
     public void SetupRectForHand(RectTransform rt, Card card)
     {
         rt.SetParent(_handParent);
-        rt.GetComponent<CardMover>().card = card;
         rt.sizeDelta = _cardDimensions;
         rt.localScale = Vector3.one;
         rt.localRotation = Quaternion.identity;
@@ -186,12 +228,17 @@ public class HandManager : MonoBehaviour, CardContainer
 
     bool IsDraggingCard()
     {
-        return heldCard != null && Input.GetMouseButton(0);
+        return IsHoldingCard() && Input.GetMouseButton(0);
     }
 
     bool IsReleasingCard()
     {
-        return heldCard != null && !Input.GetMouseButton(0);
+        return IsHoldingCard() && !Input.GetMouseButton(0);
+    }
+
+    bool IsRightClickingPile()
+    {
+        return Input.GetMouseButtonDown(1) && !IsHoldingCard() && lastHoveredPile != null && lastHoveredPile.GetComponent<OnFieldPhysicalCardHolder>() == null;
     }
 
 
@@ -207,13 +254,35 @@ public class HandManager : MonoBehaviour, CardContainer
             DragCard();
         }
 
+        if(IsRightClickingPile())
+        {
+            GameManager.Instance._uiManager.EnableRightClickMenu(lastHoveredPile.GetComponent<CardOnFieldContainer>().deck);
+        }
         CheckForPile();
-
         
     }
 
     void CheckForPile()
     {
+        if(IsHoldingCard() && CardInLibraryView())
+        {
+            if(lastHoveredPile != null)
+            {
+                lastHoveredPile.GetComponent<RaycastableHolder>().ExitMouseOver();
+                lastHoveredPile = null;
+            }
+            if(!inLibraryView)
+            {
+                pileCardDisplay.OnMouseEnter();
+                inLibraryView = true;
+            }
+            return;
+        }
+        if(IsHoldingCard() && inLibraryView)
+        {
+            pileCardDisplay.OnMouseExit();
+            inLibraryView = false;
+        }
         Transform pile = RaycastForPile();
         if(lastHoveredPile == pile)
         {
@@ -221,27 +290,28 @@ public class HandManager : MonoBehaviour, CardContainer
         }
         if(lastHoveredPile != null)
         {
-            lastHoveredPile.GetComponent<CardOnFieldContainer>().ExitMouseOver();
+            lastHoveredPile.GetComponent<RaycastableHolder>().ExitMouseOver();
         }
-        if(pile == null || pile.GetComponent<CardOnFieldContainer>().deck.GetOwner() != GetOwner())
+        if(pile == null || pile.GetComponent<RaycastableHolder>().GetOwner() != GetOwner())
         {
             lastHoveredPile = null;
             return;
         }
         lastHoveredPile = pile;
-        pile.GetComponent<CardOnFieldContainer>().EnterMouseOver();
+        pile.GetComponent<RaycastableHolder>().EnterMouseOver();
     }
 
     Transform RaycastForPile()
     {
         
         int pileLayer = LayerMask.NameToLayer("CardHolder");
-        int layerMask = (1 << pileLayer);
+        int layerMask = 1 << pileLayer;
         Ray ray = Camera.main.ScreenPointToRay(Input.mousePosition);
         RaycastHit hit;
 
         if (Physics.Raycast(ray, out hit, Mathf.Infinity, layerMask))
         {
+            lastHitPosition = hit.point;
             Transform hitObject = hit.collider.transform;
             return hitObject;
         }
@@ -254,4 +324,6 @@ public class HandManager : MonoBehaviour, CardContainer
     {
         
     }
+
+
 }

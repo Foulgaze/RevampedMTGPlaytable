@@ -1,3 +1,4 @@
+using System.Linq;
 using UnityEngine;
 using Image = UnityEngine.UI.Image;
 public class Card
@@ -7,7 +8,8 @@ public class Card
 
 	public Sprite sprite {get;}
 	public CardInfo info {get;}
-	RectTransform inHandCardRect;
+	RectTransform inHandCardRect = null;
+	Transform cardOnField = null;
 	public CardOnFieldComponents onFieldComponents {get;set;}
 
 	public CardContainer currentLocation {get;set;}
@@ -27,7 +29,7 @@ public class Card
 		}
 
 		Transform newCard = GameObject.Instantiate(gameManager.cardInHandPrefab);
-        newCard.GetComponent<CardMover>().info = info;
+        newCard.GetComponent<CardMover>().card = this;
 		inHandCardRect = newCard.GetComponent<RectTransform>();
         if(gameManager.textureLoader.TextureImage(this))
 		{
@@ -36,7 +38,7 @@ public class Card
 		newCard = GameObject.Instantiate(gameManager.customCardInHandPrefab);
 		inHandCardRect = newCard.GetComponent<RectTransform>();
 		SetCardValues(info,newCard.GetComponent<CardComponents>());
-        newCard.GetComponent<CardMover>().info = info;
+        newCard.GetComponent<CardMover>().card = this;
         return inHandCardRect;
 	}
 
@@ -58,17 +60,50 @@ public class Card
 		inHandCardRect.gameObject.SetActive(true);
 	}
 
-
-
-	public Transform GetOnFieldCard(Transform cardOnFieldPrefab)
+	public void EnableOnFieldCard()
 	{
-		if(onFieldComponents != null)
+		if(cardOnField == null)
 		{
-			return onFieldComponents.transform;
+			return;
 		}
-		Transform newCard = GameObject.Instantiate(cardOnFieldPrefab);
+		cardOnField.gameObject.SetActive(true);
+	}
+
+	public void DisableOnFieldCard()
+	{
+		if(cardOnField == null)
+		{
+			return;
+		}
+		cardOnField.gameObject.SetActive(false);
+	}
+
+
+
+	public Transform GetCardOnField()
+	{
+		if(cardOnField != null)
+		{
+			return cardOnField;
+		}
+		cardOnField = GameObject.Instantiate(gameManager.onFieldCard);		
         gameManager.textureLoader.TextureImage(this);
-		return inHandCardRect;
+		cardOnField.GetChild(0).GetComponent<CardMover>().card = this;
+		SetupOnFieldCard(cardOnField.GetComponent<CardOnFieldComponents>());
+		return cardOnField;
+	}
+
+	void SetupOnFieldCard(CardOnFieldComponents components )
+	{
+		components.cardName.text = info.name;
+		if(info.power.Length == 0)
+		{
+			components.SetPowerToughnessState(false);
+		}
+		else
+		{
+			components.cardPowerToughness.text = $"{info.power}/{info.toughness}";
+		}
 	}
 
 	void SetCardValues(CardInfo info, CardComponents components)
@@ -97,9 +132,9 @@ public class Card
 			cardImage.color = Color.white;
 			HelperFunctions.KillChildren(inHandCardRect);
 		}	
-		if(onFieldComponents != null)
+		if(cardOnField != null)
 		{
-			onFieldComponents.cardArt.sprite = newSprite;
+			cardOnField.GetComponent<CardOnFieldComponents>().cardArt.sprite = newSprite;
 		}
 	}
 }

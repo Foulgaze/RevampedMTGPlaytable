@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using UnityEngine;
 
 public class Player
 {
@@ -54,6 +55,9 @@ public class Player
         returnDict[(int) library.deckID] = library.GetDeckDescription();
         returnDict[(int) graveyard.deckID] = graveyard.GetDeckDescription();
         returnDict[(int) exile.deckID] = exile.GetDeckDescription();
+        returnDict[(int) Piletype.leftField] = boardScript.GetDeckDescriptor(Piletype.leftField);
+        returnDict[(int) Piletype.rightField] = boardScript.GetDeckDescriptor(Piletype.rightField);
+        returnDict[(int) Piletype.mainField] = boardScript.GetDeckDescriptor(Piletype.mainField);
         return returnDict;
     }
 
@@ -72,6 +76,15 @@ public class Player
                     break;
                 case (int) Piletype.exile : 
                     exile.UpdateDeck(newDecks[deck]);
+                    break;
+                case (int) Piletype.leftField:
+                    boardScript.UpdateDeck(currDescriptor, Piletype.leftField);
+                    break;
+                case (int) Piletype.mainField:
+                    boardScript.UpdateDeck(currDescriptor, Piletype.mainField);
+                    break;
+                case (int) Piletype.rightField:
+                    boardScript.UpdateDeck(currDescriptor, Piletype.rightField);
                     break;
             }
         }

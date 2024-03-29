@@ -26,7 +26,7 @@ public class BoardMovement : MonoBehaviour
 
     void CheckForMovement()
     {
-        if((!Input.GetKeyDown(KeyCode.RightArrow) && !Input.GetKeyDown(KeyCode.LeftArrow)) || _moving)
+        if((!Input.GetKeyDown(KeyCode.RightArrow) && !Input.GetKeyDown(KeyCode.LeftArrow)) || _moving || _boards.Count() > 1)
         {
             return;
         }

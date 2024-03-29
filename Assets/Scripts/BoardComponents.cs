@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using System;
 
-public enum Piletype {graveyard, library, exile}
+public enum Piletype {graveyard, library, exile, leftField, rightField, mainField}
 public class BoardComponents : MonoBehaviour
 {
     [SerializeField]
@@ -31,8 +31,11 @@ public class BoardComponents : MonoBehaviour
 
     public bool isEnemyBoard = false;
 
+    Dictionary<Piletype, Transform> piletypeToHolder;
+
     void Start()
     {
+        piletypeToHolder = new Dictionary<Piletype, Transform>(){{Piletype.leftField , leftField},{Piletype.rightField , rightField}, {Piletype.mainField , mainField} };
         SetValues();
     }
 
@@ -62,7 +65,30 @@ public class BoardComponents : MonoBehaviour
             Flip90(rightField);
             Flip90(mainField);
         }
+    }
 
+    public void SetBoardValues(int id)
+    {
+        SetBoardValue(leftField, id, 4);
+        SetBoardValue(rightField, id, 4);
+        SetBoardValue(mainField, id, 8);
+    }
+
+    public DeckDescriptor GetDeckDescriptor(Piletype position)
+    {
+        return piletypeToHolder[position].GetComponent<OnFieldPhysicalCardHolder>().GetDeckDescription(position);
+    }
+
+    public void UpdateDeck(DeckDescriptor deck, Piletype position)
+    {
+        piletypeToHolder[position].GetComponent<OnFieldPhysicalCardHolder>().UpdateDeck(deck);
+    }
+    void SetBoardValue(Transform field, int id, int cardCount)
+    {
+        OnFieldPhysicalCardHolder cardHolder = field.GetComponent<OnFieldPhysicalCardHolder>();
+        cardHolder.owner = id;
+        cardHolder.cardCount = cardCount;
+        cardHolder.SetValues();
     }
 
     void Flip90(Transform t)

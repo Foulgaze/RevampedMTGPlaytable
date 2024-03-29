@@ -32,6 +32,11 @@ public class Deck : MonoBehaviour, CardContainer
         UpdatePhysicalDeck();
     }
 
+    public void Shuffle()
+    {
+        HelperFunctions.ShuffleList<Card>(cards);
+    }
+
     public bool RemoveCard(Card card) 
     {
         bool removed = cards.Remove(card);
@@ -43,6 +48,11 @@ public class Deck : MonoBehaviour, CardContainer
     public void UpdatePhysicalDeck()
     {
         physicalDeck.SetDeck(cards, _revealTopCard);
+        LibraryBoxController libraryController = GameManager.Instance._uiManager.libraryHolder.GetComponent<LibraryBoxController>();
+        if(libraryController.enabled && libraryController.currentDeck == this)
+        {
+            libraryController.LoadCards(cards);
+        }
     }
 
     public void AddCardToContainer(Card card, int? position)
@@ -60,7 +70,7 @@ public class Deck : MonoBehaviour, CardContainer
         {
             topCard = cards[cards.Count - 1].id;
         }
-        return new DeckDescriptor(cards.Count, topCard,(int) deckID, _revealTopCard);
+        return new DeckDescriptor(cards.Count, topCard,(int) deckID, _revealTopCard, null);
     }
 
     public void RemoveCardFromContainer(Card card)
@@ -89,5 +99,10 @@ public class Deck : MonoBehaviour, CardContainer
         _revealTopCard = newDeck.revealTop;
         UpdatePhysicalDeck();
 
+    }
+
+    public void ReleaseCardInBox(Card card)
+    {
+        return;
     }
 }

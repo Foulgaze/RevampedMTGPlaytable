@@ -37,6 +37,7 @@ public class GameManager : MonoBehaviour
     NetworkManager _networkManager;
 
     // Board Info
+    public Transform onFieldCard;
     public Transform cardBack;
     public Transform pileTopper;
     public Material pilemat;
@@ -50,7 +51,9 @@ public class GameManager : MonoBehaviour
     // TO DO
     // LOAD VALUES FROM FILES
 
-    public int necessaryCardCount = 100;
+    public int necessaryCardCount = 100;    
+
+    public bool gameInteractable = true;
     bool requireCardCount = false;
 
 
@@ -75,8 +78,7 @@ public class GameManager : MonoBehaviour
 
     public bool _gameStarted = false;
 
-    [HideInInspector]
-    public bool singlePlayer = false;
+    public bool singlePlayer = true;
 
 
     private void Awake() 
@@ -94,7 +96,6 @@ public class GameManager : MonoBehaviour
 
     void FauxGame()
     {
-        _readyUpNeeded = 1;
         AddUser(_uuid, "Gabe");
         _readyUpNeeded = 1;
         ReadyUp(_uuid, "{ \"Plains\": 1, \"Serra Angel\": 1, \"Lightning Bolt\": 1, \"Counterspell\": 1, \"Giant Growth\": 1, \"Llanowar Elves\": 1, \"Doom Blade\": 1, \"Wrath of God\": 1, \"Black Lotus\": 1, \"Birds of Paradise\": 1, \"Lightning Helix\": 1 }");
@@ -121,6 +122,7 @@ public class GameManager : MonoBehaviour
 
         FauxGame();
     }
+
     public void AddUser( string uuid,string name)
     {
         if(_gameStarted)
@@ -153,6 +155,7 @@ public class GameManager : MonoBehaviour
             Transform newBoard = GameObject.Instantiate(_boardPrefab);
             BoardComponents components = newBoard.GetComponent<BoardComponents>();
             Player player = new Player(uuid,uuidToName[uuid], playerID++, components);
+            components.SetBoardValues(player.id);
             uuidToPlayer[uuid] = player;
             if(uuid == _uuid)
             {
