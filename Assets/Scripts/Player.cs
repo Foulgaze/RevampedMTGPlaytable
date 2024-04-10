@@ -27,15 +27,13 @@ public class Player
     void SetupPiles()
     {
         this.library = boardScript.library;
-        this.library._revealTopCard = false;
+        this.library.LateConstructor(Piletype.library, id, $"{name}'s Library", false);
         this.library.deckID = Piletype.library;
-        this.library.owner = id;
 		this.exile = boardScript.exile;
-        this.exile.deckID = Piletype.exile;
-        this.exile.owner = id;
+        this.exile.LateConstructor(Piletype.exile, id, $"{name}'s exile");
 		this.graveyard = boardScript.graveyard;
-		this.graveyard.deckID = Piletype.graveyard;
-        this.graveyard.owner = id;
+        this.graveyard.LateConstructor(Piletype.graveyard, id, $"{name}'s graveyard");
+
     }
 
     public bool DrawCard()
@@ -49,6 +47,8 @@ public class Player
         return true;
     }
 
+    
+
     public Dictionary<int, DeckDescriptor> GetDeckDescriptions()
     {
         Dictionary<int, DeckDescriptor> returnDict = new Dictionary<int,DeckDescriptor>();
@@ -59,6 +59,17 @@ public class Player
         returnDict[(int) Piletype.rightField] = boardScript.GetDeckDescriptor(Piletype.rightField);
         returnDict[(int) Piletype.mainField] = boardScript.GetDeckDescriptor(Piletype.mainField);
         return returnDict;
+    }
+
+    public Deck GetDeck(Piletype pile)
+    {
+        switch(pile)
+        {
+            default:
+            case Piletype.graveyard: return graveyard;
+            case Piletype.library: return library;
+            case Piletype.exile: return exile;
+        }
     }
 
     public void UpdateDecks(Dictionary<int, DeckDescriptor> newDecks)

@@ -43,7 +43,7 @@ public class CardMover : MonoBehaviour, IPointerDownHandler, IPointerEnterHandle
 
       public void OnPointerDown(PointerEventData eventData)
     {
-        if(handManager.IsHoldingCard() || !GameManager.Instance.gameInteractable || eventData.button != PointerEventData.InputButton.Left)
+        if(handManager.IsHoldingCard() || !GameManager.Instance.gameInteractable || eventData.button != PointerEventData.InputButton.Left || !card.interactable)
         {
             return;
         }

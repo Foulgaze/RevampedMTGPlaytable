@@ -29,10 +29,15 @@ public class PileController : MonoBehaviour
         _cards.Clear();
         for(int i = 0; i < newCards.Count; ++i)
         {
+            if(newCards[i] != null)
+            {
+                newCards[i].DisableRect();
+            }
             Transform newCard = GenerateNewCard();
             newCard.position = GetIthCardPosition(i);
             _cards.Push(newCard);
         }
+        
         UpdateTopCard(newCards, revealTop);
     }
     public void UpdateTopCard(List<Card> newCards, bool revealTop)
@@ -54,12 +59,13 @@ public class PileController : MonoBehaviour
         else
         {
             cardTopper = card.GetInHandRect();
+            card.EnableRect();
         }
-        cardTopper.SetParent(canvasObj);
-        SetTopperValues(card, cardTopper);
+        cardTopper.transform.SetParent(canvasObj);
+        SetTopperValues(cardTopper);
     }
 
-    void SetTopperValues(Card card, RectTransform cardTopper)
+    void SetTopperValues( RectTransform cardTopper)
     {
         
         cardTopper.localPosition = Vector3.zero;

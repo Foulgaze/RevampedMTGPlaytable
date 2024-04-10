@@ -9,6 +9,7 @@ public class Deck : MonoBehaviour, CardContainer
     public Piletype deckID {get;set;}
     public List<Card> cards = new List<Card>();
     public PileController physicalDeck {set;get;}
+    public string name {get;set;}
 
     public int owner {get;set;}
     public bool _revealTopCard {get; set;} = true ;
@@ -49,10 +50,15 @@ public class Deck : MonoBehaviour, CardContainer
     {
         physicalDeck.SetDeck(cards, _revealTopCard);
         LibraryBoxController libraryController = GameManager.Instance._uiManager.libraryHolder.GetComponent<LibraryBoxController>();
-        if(libraryController.enabled && libraryController.currentDeck == this)
+        if(libraryController.gameObject.activeInHierarchy && libraryController.currentDeck == this)
         {
-            libraryController.LoadCards(cards);
+            libraryController.UpdateHolder();
         }
+    }
+
+    public void DeleteDeckOnField()
+    {
+        physicalDeck.SetDeck(new List<Card>(), false);
     }
 
     public void AddCardToContainer(Card card, int? position)
@@ -71,6 +77,27 @@ public class Deck : MonoBehaviour, CardContainer
             topCard = cards[cards.Count - 1].id;
         }
         return new DeckDescriptor(cards.Count, topCard,(int) deckID, _revealTopCard, null);
+    }
+
+    public void LateConstructor(Piletype type, int id, string name, bool revealTop = true)
+    {
+        this.deckID = type;
+        this.owner = id;
+        this.name = name;
+        this._revealTopCard = revealTop;
+    }
+
+    public bool MoveTopCardToBottom()
+    {
+        if(cards.Count < 2)
+        {
+            return false;
+        }
+        Card topCard = cards[cards.Count-1];
+        cards.Remove(topCard);
+        cards.Insert(0,topCard);
+        UpdatePhysicalDeck();
+        return true;
     }
 
     public void RemoveCardFromContainer(Card card)
@@ -98,7 +125,16 @@ public class Deck : MonoBehaviour, CardContainer
         }
         _revealTopCard = newDeck.revealTop;
         UpdatePhysicalDeck();
+    }
 
+    public List<int> GetCards()
+    {
+        List<int> cardInts = new List<int>();
+        foreach(Card card in cards)
+        {
+            cardInts.Add(card.id);
+        }
+        return cardInts;
     }
 
     public void ReleaseCardInBox(Card card)

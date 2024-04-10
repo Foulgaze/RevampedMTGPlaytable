@@ -3,7 +3,6 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using TMPro;
-using UnityEditor.UI;
 using UnityEngine;
 using UnityEngine.UI;
 public class LibraryBoxController : MonoBehaviour, CardContainer
@@ -17,45 +16,163 @@ public class LibraryBoxController : MonoBehaviour, CardContainer
     [SerializeField]
     RectTransform scrollView;
 
-    public RectTransform cardHolder;
+    [SerializeField]
+    TextMeshProUGUI boxName;
 
+    [SerializeField]
+    Transform hiddenCardPrefab;
+
+
+    public RectTransform cardHolder;
+    public bool interactable;
 
     int cardsPerRow = 5;
     float cardRatio = 5f/7;
+
+    [HideInInspector]
     public Vector2 cardDimensions;
 
+    [HideInInspector]
     public Deck currentDeck;
-    List<Transform> heldCards = new List<Transform>();
+    bool renderEntireLibrary = false;
+    List<Card> cardsToRender;
+    List<Transform> hiddenCards = new List<Transform>();
+    Transform unusedCardHolder;
 
     void Start()
     {
+        unusedCardHolder = GameManager.Instance._uiManager.unusedCardHolder;
         cardHolder = layout.transform.GetComponent<RectTransform>();
     }
 
 
-    public void LoadPile(Deck deck)
+    public void LoadPile(Deck deck, List<Card> cardsToRender, bool interactable)
     {
         if(deck == null)
         {
             Debug.LogError("Unable to load deck");
         }
+        gameObject.SetActive(true);
+        this.interactable = interactable;
+        renderEntireLibrary = cardsToRender == null;
+        Cleanup();
+        this.cardsToRender = cardsToRender;
+        this.boxName.text = deck.name;
         currentDeck = deck;
-        LoadCards(deck.cards);
+        boxName.text = GetName(currentDeck.deckID);
+        if(renderEntireLibrary)
+        {
+            RenderLibrary(deck.cards);
+        }
+        else
+        {
+            RenderTopXCards(deck.cards);
+        }
     }
-    public void LoadCards(List<Card> cards)
+
+    void Cleanup()
+    {
+        DestroyHiddenCards();
+        CleanupChildren();
+        cardsToRender = null;
+    }
+
+    void DestroyHiddenCards()
+    {
+        if(hiddenCards == null)
+        {
+            return;
+        }
+        foreach(Transform t in hiddenCards)
+        {
+            Destroy(t.gameObject);
+        }
+        hiddenCards.Clear();
+    }
+
+    void CleanupChildren()
+    {
+        List<Transform> children = new List<Transform>();
+        foreach(Transform card in cardHolder.transform)
+        {
+            children.Add(card);
+        }
+        foreach(Transform card in children)
+        {
+            card.SetParent(unusedCardHolder);
+        }
+    }
+
+    string GetName(Piletype deckid)
+    {
+        switch(deckid)
+        {
+            default: return "Unknown";
+            case Piletype.library: return "Library";
+            case Piletype.graveyard: return "Graveyard";
+            case Piletype.exile: return "Exile";
+        }
+    }
+
+    public void UpdateHolder()
+    {
+        DestroyHiddenCards();
+        if(renderEntireLibrary)
+        {
+            RenderLibrary(currentDeck.cards);
+        }
+        else
+        {
+            RenderTopXCards(currentDeck.cards);
+        }
+    }
+    public void RenderLibrary(List<Card> cards)
     {
         List<Card> cardsCopy = new List<Card>(cards);
         cardsCopy = cardsCopy.OrderBy(x=>x.info.name).ToList();
         SetGridValues(cardsCopy.Count);
-        foreach(Card card in cardsCopy)
+        for(int i = 0; i < cardsCopy.Count; ++i)
         {
-            RectTransform newCardIcon = card.GetInHandRect();
-            newCardIcon.sizeDelta = layout.cellSize;
-            newCardIcon.transform.SetParent(layout.transform);
+            Card card = cardsCopy[i];
+            RectTransform newCardIcon = card.GetInHandRect(interactable);
             card.EnableRect();
-            // newCardIcon.GetChild(0).GetComponent<TextMeshProUGUI>().text = card.info.name;
-            // heldCards.Add(newCardIcon);
+            SetupCardForHolder(newCardIcon);
+            newCardIcon.transform.SetParent(layout.transform);
+            newCardIcon.SetSiblingIndex(i);
         }
+    }
+
+    public void RenderTopXCards(List<Card> allCards)
+    {
+        List<Card> cardCopy = new List<Card>(allCards);
+        cardCopy.Reverse();
+        SetGridValues(allCards.Count);
+        for(int i = 0; i < allCards.Count; ++i)
+        {
+            Card card = cardCopy[i];
+            RectTransform newCardIcon;
+            if(cardsToRender.Contains(card))
+            {
+                newCardIcon = card.GetInHandRect(interactable);
+                card.EnableRect();
+            }
+            else
+            {
+                Transform newCard = Instantiate(hiddenCardPrefab);
+                hiddenCards.Add(newCard);
+                newCardIcon = newCard.GetComponent<RectTransform>();
+            }
+            SetupCardForHolder(newCardIcon);
+            newCardIcon.SetSiblingIndex(i);
+        }
+    }
+
+    void SetupCardForHolder(RectTransform rt)
+    {
+        rt.sizeDelta = layout.cellSize;
+        rt.transform.SetParent(layout.transform);
+        rt.localScale = Vector3.one;
+        rt.localRotation = Quaternion.identity;
     }
 
     void SetGridValues(int cardCount)
@@ -95,7 +212,37 @@ public class LibraryBoxController : MonoBehaviour, CardContainer
 
     public void ReleaseCardInBox(Card card)
     {
-        AddCardToContainer(card, null);
-        currentDeck.ReleaseCardInBox(card);
+        if(cardHolder.childCount == 0)
+        {
+            AddCardToContainer(card, null);
+            return;
+        }
+        AddCardToContainer(card, Math.Min(currentDeck.cards.Count(), cardHolder.childCount - FindClosestTransform()));
+    }
+
+    int FindClosestTransform()
+    {
+        Vector2 mousePosition = Input.mousePosition;
+        float currentMinDistance = float.MaxValue;
+        int currentIndex = 0;
+        for(int i = 0; i < cardHolder.childCount; ++i)
+        {
+            Transform currentChild = cardHolder.GetChild(i);
+            float currentDistance = Vector3.Distance(currentChild.position, mousePosition);
+            if(currentDistance < currentMinDistance)
+            {
+                currentMinDistance = currentDistance;
+                currentIndex = i;
+                if(currentChild.transform.position.x < mousePosition.x)
+                {
+                    currentIndex += 1;
+                }
+            }
+        }
+        if(currentMinDistance > layout.cellSize.y/2)
+        {
+            return cardHolder.childCount;
+        }
+        return currentIndex;
     }
 }

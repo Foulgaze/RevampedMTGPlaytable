@@ -1,5 +1,8 @@
+using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
+using CsvHelper.Configuration.Attributes;
 using TMPro;
 using UnityEngine;
 
@@ -29,7 +32,18 @@ public class UIManager : MonoBehaviour
 
     [SerializeField]
     public Transform libraryHolder;
-    
+
+    [SerializeField]
+    RevealPlayerManager selectPlayerMenu;
+
+    [SerializeField]
+    Transform playerButton;
+
+    [SerializeField]
+    LibraryBoxController revealHolder;
+
+    public Transform unusedCardHolder;
+    public LibraryBoxController libraryBoxController;
 
     public Deck currentSelectedDeck;
 
@@ -96,7 +110,10 @@ public class UIManager : MonoBehaviour
     public void EnableDrawCardsBox()
     {
         GameManager.Instance.gameInteractable = false;
+        drawCardBox.transform.position = new Vector3(Screen.width/2, Screen.height/2, 0);
         drawCardBox.gameObject.SetActive(true);
+        drawCardBox.SetAsLastSibling();
+        DisableRightClickMenu();
     }
 
     public void DisableDrawCardsBox()
@@ -110,6 +127,7 @@ public class UIManager : MonoBehaviour
         currentSelectedDeck = deck;
         rightClickMenu.gameObject.SetActive(true);
         RectTransform menu = rightClickMenu.GetComponent<RectTransform>();
+        rightClickMenu.SetAsLastSibling();
         menu.position = Input.mousePosition + new Vector3(menu.sizeDelta.x/2,menu.sizeDelta.y/2 ,0);
     }
 
@@ -121,8 +139,36 @@ public class UIManager : MonoBehaviour
     public Transform ShowLibrary()
     {
         libraryHolder.gameObject.SetActive(true);
+        libraryHolder.SetAsLastSibling();
         return libraryHolder;
     }
+
+    public void HideLibrary()
+    {
+        libraryHolder.gameObject.SetActive(false);
+    }
+    
+
+    public void Disable(Transform thingToDisable)
+    {
+        thingToDisable.gameObject.SetActive(false);
+    }
+
+    public void Enable(Transform thingToEnable) // easy to call function w/ buttons
+    {
+        thingToEnable.gameObject.SetActive(true);
+        thingToEnable.SetAsLastSibling();
+    }
+
+    public void RevealXCardsFromLibrary(Transform dialogBox)
+    {
+        LibraryInfoStorage storage = dialogBox.GetComponent<LibraryInfoStorage>();
+        storage.ClearInput();
+        storage.currentDeck = currentSelectedDeck;
+        dialogBox.SetAsLastSibling();
+        dialogBox.gameObject.SetActive(true);
+    }
+
 
 
 
@@ -151,5 +197,37 @@ public class UIManager : MonoBehaviour
         ChangeReadyStatus();
     }
 
-    
+    public void SelectPlayerMenu(bool showCardCount)
+    {
+        GameManager manager = GameManager.Instance;
+        List<Player> players = new List<Player>();
+        foreach(Player player in manager.uuidToPlayer.Values)
+        {
+            if(player != manager.clientPlayer)
+            {
+                players.Add(player);
+            }
+        }
+        selectPlayerMenu.EnableBox(players, currentSelectedDeck, showCardCount);
+    }
+
+    public void RevealOpponentLibrary(LibraryDescriptor descriptor, string uuid)
+    {
+        Deck deck = GameManager.Instance.uuidToPlayer[uuid].GetDeck(descriptor.deckID);
+        deck.cards = GameManager.Instance.IntToCards(descriptor.cards);
+        if(descriptor.cardShowCount == null)
+        {
+            revealHolder.LoadPile(deck,null,false);
+        }
+        else
+        {
+            int cardMax = Math.Min(deck.cards.Count, (int)descriptor.cardShowCount);
+            if(cardMax == 0)
+            {
+                return;
+            }
+            List<Card> cardsToRender = deck.cards.GetRange(deck.cards.Count - cardMax, cardMax);
+            revealHolder.LoadPile(deck,cardsToRender,false);
+        }
+    }
 }

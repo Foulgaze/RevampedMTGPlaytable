@@ -8,7 +8,7 @@ using Random = UnityEngine.Random;
 using System.Collections;
 public enum NetworkInstruction
 {
-    playerConnection, readyUp, userDisconnect, setLobbySize, chatboxMessage, unReady, updateDecks
+    playerConnection, readyUp, userDisconnect, setLobbySize, chatboxMessage, unReady, updateDecks, showLibrary, revealTopCard
 }
 
 public class GameManager : MonoBehaviour
@@ -30,6 +30,7 @@ public class GameManager : MonoBehaviour
 
     // CHILDREN
     public UIManager _uiManager;
+    public WindowMoverController windowController;
     public TextureLoader textureLoader;
     public HandManager handManager;
 
@@ -73,7 +74,7 @@ public class GameManager : MonoBehaviour
     public string _username;
 
     public Player clientPlayer;
-    Dictionary<string, Player> uuidToPlayer = new Dictionary<string, Player>();
+    public Dictionary<string, Player> uuidToPlayer = new Dictionary<string, Player>();
     public Dictionary<int, Card> idToCard = new Dictionary<int, Card>();
 
     public bool _gameStarted = false;
@@ -141,6 +142,47 @@ public class GameManager : MonoBehaviour
         if(!uuidToName.ContainsKey(uuid))
             return;
         uuidToName.Remove(uuid); 
+    }
+
+    public void SendRevealedDeck(RevealPlayerManager controller)
+    {
+        List<string> uuids = controller.GetSelectedPlayers();
+        if(uuids.Count == 0)
+        {
+            return;
+        }
+        LibraryDescriptor descriptor;
+        List<int> allCards = controller.selectedDeck.GetCards();
+        int? cardShowCount = null;
+        if(controller.input.gameObject.activeInHierarchy)
+        {
+            int output;
+            if(Int32.TryParse(controller.input.text, out output))
+            {
+                cardShowCount = output;
+            }
+        }
+        descriptor = new LibraryDescriptor(allCards, controller.selectedDeck.deckID,uuids, cardShowCount);
+        _networkManager.SendMessage(NetworkInstruction.showLibrary, JsonConvert.SerializeObject(descriptor));
+    }
+
+    public void RevealOpponentLibrary(string message, string uuid)
+    {
+        LibraryDescriptor descriptor = JsonConvert.DeserializeObject<LibraryDescriptor>(message);
+        if(descriptor.uuids.Contains(_uuid))
+        {
+            _uiManager.RevealOpponentLibrary(descriptor, uuid);
+        }
+    }
+
+    public List<Card> IntToCards(List<int> intToCard)
+    {
+        List<Card> returnCards = new List<Card>();
+        foreach(int cardNumber in intToCard)
+        {
+            returnCards.Add(idToCard[cardNumber]);
+        }
+        return returnCards;
     }
 
 
@@ -269,6 +311,19 @@ public class GameManager : MonoBehaviour
         Dictionary<int, DeckDescriptor> newDecks = JsonConvert.DeserializeObject<Dictionary<int,DeckDescriptor>>(decks);
         p.UpdateDecks(newDecks);
     }
+
+    public void UpdateRevealDeck(string uuid)
+    {
+        Player player = uuidToPlayer[uuid];
+        player.library._revealTopCard = !player.library._revealTopCard;
+        player.library.UpdatePhysicalDeck();
+    }
+
+    public void NetworkUpdateDeck()
+    {
+        _networkManager.SendMessage(NetworkInstruction.revealTopCard);
+    }
+    
 
     public bool VerifySubmittedDeck(TMP_InputField textMeshProText)
     {

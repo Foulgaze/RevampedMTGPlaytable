@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Linq;
 using TMPro;
 using UnityEngine;
+using UnityEngine.UIElements;
 
 public class PlayerController : MonoBehaviour
 {
@@ -61,9 +62,55 @@ public class PlayerController : MonoBehaviour
 
     public void ViewLibrary()
     {
+        if(GameManager.Instance._uiManager.libraryHolder.gameObject.activeInHierarchy)
+        {
+            HideLibrary(GameManager.Instance._uiManager.libraryHolder.GetComponent<LibraryBoxController>());
+        }
         Transform library = GameManager.Instance._uiManager.ShowLibrary();
+        library.position = new Vector3(Screen.width/2, Screen.height/2, 0);
         LibraryBoxController controller = library.GetComponent<LibraryBoxController>();
-        controller.LoadPile(GameManager.Instance._uiManager.currentSelectedDeck);
+        controller.LoadPile(GameManager.Instance._uiManager.currentSelectedDeck, null, true);
+    }
+
+    public void ViewTopXLibrary(LibraryInfoStorage storage)
+    {
+        if(GameManager.Instance._uiManager.libraryHolder.gameObject.activeInHierarchy)
+        {
+            HideLibrary(GameManager.Instance._uiManager.libraryHolder.GetComponent<LibraryBoxController>());
+        }
+        int cardCount;
+        if(!Int32.TryParse(storage.input.text, out cardCount))
+        {
+            return;
+        }
+        List<Card> deckCards = storage.currentDeck.cards;
+        cardCount = Math.Min(cardCount,deckCards.Count());
+        Transform library = GameManager.Instance._uiManager.ShowLibrary();
+        library.position = new Vector3(Screen.width/2, Screen.height/2, 0);
+        LibraryBoxController controller = library.GetComponent<LibraryBoxController>();
+        List<Card> viewableCards = deckCards.GetRange(deckCards.Count - cardCount, cardCount);
+        controller.LoadPile(storage.currentDeck, viewableCards, true);
+    }
+
+    public void HideLibrary(LibraryBoxController controller)
+    {
+        controller.gameObject.SetActive(false);
+        controller.currentDeck.UpdatePhysicalDeck();
+        controller.currentDeck = null;
+        Deck currentlySelected = GameManager.Instance._uiManager.currentSelectedDeck;
+        if(currentlySelected != null)
+        {
+            currentlySelected.UpdatePhysicalDeck();
+        }
+    }
+
+    public void MoveTopCardToBottom()
+    {
+        Player currentPlayer = GameManager.Instance.clientPlayer;
+        if(currentPlayer.library.MoveTopCardToBottom())
+        {
+            GameManager.Instance.SendUpdatedDecks();
+        }
     }
 
     // Update is called once per frame
@@ -85,5 +132,6 @@ public class PlayerController : MonoBehaviour
         {
             ShuffleDeck();
         }
+        
     }
 }

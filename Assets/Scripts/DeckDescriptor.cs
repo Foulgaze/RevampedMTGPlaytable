@@ -18,5 +18,23 @@ public class DeckDescriptor
 		this.revealTop = revealTop;
 		this.cards = cards;
 	}
+}
 
+
+public class LibraryDescriptor
+{
+	public List<int> cards {get;}
+	public List<int> allCards {get;}
+	public Piletype deckID {get;}
+	public List<string> uuids {get;}
+	public int? cardShowCount {get;}
+
+
+	public LibraryDescriptor(List<int> cards, Piletype deckID, List<string> uuids, int? cardShowCount)
+	{
+		this.cards = cards;
+		this.deckID = deckID;
+		this.uuids = uuids;
+		this.cardShowCount = cardShowCount;
+	}
 }

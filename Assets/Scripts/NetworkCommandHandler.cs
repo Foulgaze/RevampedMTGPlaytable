@@ -104,6 +104,21 @@ public class NetworkCommandHandler
                 // chatbox.AddMessage($"{gameManager.readyCount}/{gameManager.lobbySize} users ready.");
                 break;
             }
+            case (int) NetworkInstruction.showLibrary: // When a user unreadies up
+            {
+                if(msgUUID != GameManager.Instance._uuid)
+                {
+                    GameManager.Instance.RevealOpponentLibrary(instruction, msgUUID);
+                }
+                // chatbox.AddMessage($"{gameManager.getUsername(uuid)} has unreadied.");
+                // chatbox.AddMessage($"{gameManager.readyCount}/{gameManager.lobbySize} users ready.");
+                break;
+            }
+            case (int) NetworkInstruction.revealTopCard:
+            {
+                GameManager.Instance.UpdateRevealDeck(msgUUID);
+                break;
+            }
             
         }
     }

@@ -64,13 +64,18 @@ public class HandManager : MonoBehaviour, CardContainer
 
     bool CardInLibraryView()
     {
-        return RectTransformUtility.RectangleContainsScreenPoint(pileViewBox, Input.mousePosition);
+        return pileViewBox.gameObject.activeInHierarchy && RectTransformUtility.RectangleContainsScreenPoint(pileViewBox, Input.mousePosition);
     }
 
     public void BeginCardDrag(Card card, Vector2 offset)
     {
+        if(CardInLibraryView() && !GameManager.Instance._uiManager.libraryBoxController.interactable)
+        {
+            return;
+        }
         bool cardInHand = CardInHand(card);
         heldCard = card;
+        heldCard.ResetPivot();
         this.offset = cardInHand ? offset : Vector2.zero;
         if(cardInHand)
         {
@@ -120,7 +125,7 @@ public class HandManager : MonoBehaviour, CardContainer
         }
         else if(inLibraryView)
         {
-            pileCardDisplay.libraryController.AddCardToContainer(heldCard, null);
+            pileCardDisplay.libraryController.ReleaseCardInBox(heldCard);
         }
         else if(lastHoveredPile == null)
         {
@@ -135,10 +140,10 @@ public class HandManager : MonoBehaviour, CardContainer
                 container.ReleaseCardInBox(heldCard);
             }
         }
-        Debug.Log("releasing Card");
         lastHoveredPile = null;
         inLibraryView = false;
         heldCard = null;
+        offset = Vector2.zero;
         GameManager.Instance.SendUpdatedDecks();
     }
     
@@ -153,6 +158,7 @@ public class HandManager : MonoBehaviour, CardContainer
 
     public void SetupRectForHand(RectTransform rt, Card card)
     {
+        card.ResetPivot();
         rt.SetParent(_handParent);
         rt.sizeDelta = _cardDimensions;
         rt.localScale = Vector3.one;
@@ -264,7 +270,7 @@ public class HandManager : MonoBehaviour, CardContainer
 
     void CheckForPile()
     {
-        if(IsHoldingCard() && CardInLibraryView())
+        if(IsHoldingCard() && CardInLibraryView() && GameManager.Instance._uiManager.libraryBoxController.interactable)
         {
             if(lastHoveredPile != null)
             {

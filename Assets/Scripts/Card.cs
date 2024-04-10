@@ -10,6 +10,8 @@ public class Card
 	public CardInfo info {get;}
 	RectTransform inHandCardRect = null;
 	Transform cardOnField = null;
+
+	public bool interactable = true;
 	public CardOnFieldComponents onFieldComponents {get;set;}
 
 	public CardContainer currentLocation {get;set;}
@@ -23,11 +25,22 @@ public class Card
 
 	public RectTransform GetInHandRect()
 	{
+		this.interactable = true;
+		return GenerateInHandRect();
+	}
+
+	public RectTransform GetInHandRect(bool interactable)
+	{
+		this.interactable = interactable;
+		return GenerateInHandRect();
+	}
+
+	RectTransform GenerateInHandRect()
+	{
 		if(inHandCardRect != null)
 		{
 			return inHandCardRect;
 		}
-
 		Transform newCard = GameObject.Instantiate(gameManager.cardInHandPrefab);
         newCard.GetComponent<CardMover>().card = this;
 		inHandCardRect = newCard.GetComponent<RectTransform>();
@@ -49,6 +62,17 @@ public class Card
 			return;
 		}
 		inHandCardRect.gameObject.SetActive(false);
+	}
+
+	public void ResetPivot()
+	{
+		if(inHandCardRect == null)
+		{
+			return;
+		}
+		inHandCardRect.anchorMin = new Vector2(0.5f, 0.5f); // Center
+        inHandCardRect.anchorMax = new Vector2(0.5f, 0.5f); // Center
+        inHandCardRect.pivot = new Vector2(0.5f, 0.5f); // Center
 	}
 
 	public void EnableRect()
