@@ -603,7 +603,6 @@ GameObject:
   - component: {fileID: 125719905}
   - component: {fileID: 125719908}
   - component: {fileID: 125719907}
-  - component: {fileID: 125719906}
   m_Layer: 5
   m_Name: cardHolder
   m_TagString: Untagged
@@ -632,20 +631,6 @@ RectTransform:
   m_AnchoredPosition: {x: 0, y: 0}
   m_SizeDelta: {x: 600, y: 600}
   m_Pivot: {x: 0.5, y: 0.5}
---- !u!114 &125719906
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 125719904}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 4be52b32e907a57418ac55b154ba6d36, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  mouseInBox: 0
-  libraryController: {fileID: 1657943008}
 --- !u!114 &125719907
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -2491,14 +2476,14 @@ MonoBehaviour:
   pileTopper: {fileID: 2028856195250915810, guid: e9517e80a0539af418fa02a4aac2625c, type: 3}
   pilemat: {fileID: 2100000, guid: 3d14b5c56225e834494cca532136a1d7, type: 2}
   _boardMovement: {fileID: 651060504}
-  _boardPrefab: {fileID: 7314620612561168425, guid: 196cb3506e8130045950d0cb9d159d12, type: 3}
+  _boardPrefab: {fileID: 3791580573722900575, guid: 196cb3506e8130045950d0cb9d159d12, type: 3}
   necessaryCardCount: 100
   gameInteractable: 1
   cardInHandPrefab: {fileID: 661876043596071734, guid: 3509b33ce399a7b4bb6630ee9f43fcfc, type: 3}
   customCardInHandPrefab: {fileID: 7682405528660092856, guid: bc234dda8a28c1f4e8301fef3da7a31d, type: 3}
   _username: 
   _gameStarted: 0
-  singlePlayer: 0
+  singlePlayer: 1
 --- !u!4 &651060502
 Transform:
   m_ObjectHideFlags: 0
@@ -2570,8 +2555,8 @@ MonoBehaviour:
   _handParent: {fileID: 1459457118}
   _checkHandBox: {fileID: 1418022409}
   _boxExtents: {x: 0, y: 0}
-  pileCardDisplay: {fileID: 876666719}
-  pileViewBox: {fileID: 2019383933}
+  deckDisplay: {fileID: 876666719}
+  pileViewBox: {fileID: 1908971243}
   offset: {x: 0, y: 0}
   lastHitPosition: {x: 0, y: 0, z: 0}
 --- !u!114 &651060506
@@ -2928,8 +2913,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 4be52b32e907a57418ac55b154ba6d36, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  mouseInBox: 0
-  libraryController: {fileID: 1908971244}
+  deckDisplayController: {fileID: 1908971244}
 --- !u!1 &878088166
 GameObject:
   m_ObjectHideFlags: 0
@@ -5184,7 +5168,7 @@ MonoBehaviour:
         m_Mode: 2
         m_Arguments:
           m_ObjectArgument: {fileID: 1908971244}
-          m_ObjectArgumentAssemblyTypeName: LibraryBoxController, Assembly-CSharp
+          m_ObjectArgumentAssemblyTypeName: DisplayDeckController, Assembly-CSharp
           m_IntArgument: 0
           m_FloatArgument: 0
           m_StringArgument: 
@@ -6218,7 +6202,7 @@ MonoBehaviour:
         m_Mode: 2
         m_Arguments:
           m_ObjectArgument: {fileID: 1657943008}
-          m_ObjectArgumentAssemblyTypeName: LibraryBoxController, Assembly-CSharp
+          m_ObjectArgumentAssemblyTypeName: DisplayDeckController, Assembly-CSharp
           m_IntArgument: 0
           m_FloatArgument: 0
           m_StringArgument: 
