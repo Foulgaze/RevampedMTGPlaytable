@@ -15,7 +15,7 @@ public class HelperFunctions : MonoBehaviour
         RectTransformUtility.ScreenPointToLocalPointInRectangle( transform, screenPoint, canvasCamera, out localPoint );
         return transform.rect.Contains( localPoint );
     }
-    void ShuffleList<T>(List<T> list)
+    public static void ShuffleList<T>(List<T> list)
     {
         int n = list.Count;
         while (n > 1)
