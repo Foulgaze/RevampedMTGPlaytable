@@ -113,6 +113,39 @@ public class PlayerController : MonoBehaviour
         }
     }
 
+    public void MillXCards(TMP_InputField userInput)
+    {
+        TransferXCards(userInput, GameManager.Instance.clientPlayer.graveyard);
+    }
+
+     public void ExileXCards(TMP_InputField userInput)
+    {
+        TransferXCards(userInput, GameManager.Instance.clientPlayer.exile);
+    }
+
+    public void TransferXCards(TMP_InputField userInput, Deck resultDeck)
+    {
+        int result;
+        if(!int.TryParse(userInput.text, out result))
+        {
+            return;
+        }
+        if(result == 0)
+        {
+            return;
+        }
+        for(int i = 0; i < result ;++i)
+        {
+            Card? drawnCard = GameManager.Instance.clientPlayer.library.DrawCard();
+            if(drawnCard == null)
+            {
+                break;
+            }
+            resultDeck.AddCard(drawnCard);
+        }
+        GameManager.Instance.SendUpdatedDecks();
+    }
+
     // Update is called once per frame
     void Update()
     {
