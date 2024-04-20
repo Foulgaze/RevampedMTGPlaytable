@@ -8,7 +8,7 @@ using Random = UnityEngine.Random;
 using System.Collections;
 public enum NetworkInstruction
 {
-    playerConnection, readyUp, userDisconnect, setLobbySize, chatboxMessage, unReady, updateDecks, showLibrary, revealTopCard
+    playerConnection, readyUp, userDisconnect, setLobbySize, chatboxMessage, unReady, updateDecks, showLibrary, revealTopCard, millXCards
 }
 
 public class GameManager : MonoBehaviour
@@ -289,7 +289,6 @@ public class GameManager : MonoBehaviour
         }
         uuidToPlayer[uuid].library = null;
         readyUpCount -= 1;
-
     }
 
     public void SendUpdatedDecks()
