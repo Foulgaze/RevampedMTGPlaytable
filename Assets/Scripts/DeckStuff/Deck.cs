@@ -32,7 +32,6 @@ public class Deck : MonoBehaviour, CardContainer
         cards.Add(card);
         UpdatePhysicalDeck();
     }
-
     public void Shuffle()
     {
         HelperFunctions.ShuffleList<Card>(cards);
@@ -63,6 +62,7 @@ public class Deck : MonoBehaviour, CardContainer
 
     public void AddCardToContainer(Card card, int? position)
     {
+        card.ClearStats();
         int insertPosition = position == null ? cards.Count : (int)position;
         cards.Insert(insertPosition, card);
         card.EnableRect();

@@ -9,6 +9,7 @@ public class CardOnFieldComponents : MonoBehaviour
 {
     public Transform leftSide;
     public Transform rightSide;
+    public Transform tappedSymbol;
     public Image cardArt;
     public TextMeshProUGUI cardName;
     public TextMeshProUGUI cardPowerToughness;

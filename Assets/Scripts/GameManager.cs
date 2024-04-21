@@ -57,7 +57,7 @@ public class GameManager : MonoBehaviour
     public bool gameInteractable = true;
     bool requireCardCount = false;
 
-
+    public int tapDegrees = 5;
     float _cameraHeight = 15.5f;
     float _cameraAngle = 70;
     float _cameraZOffset = -2.5f;

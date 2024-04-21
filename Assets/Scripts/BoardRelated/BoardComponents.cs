@@ -76,16 +76,16 @@ public class BoardComponents : MonoBehaviour
 
     public DeckDescriptor GetDeckDescriptor(Piletype position)
     {
-        return piletypeToHolder[position].GetComponent<DeckRepresentation>().GetDeckDescription(position);
+        return piletypeToHolder[position].GetComponent<CardOnFieldBoard>().GetDeckDescription(position);
     }
 
     public void UpdateDeck(DeckDescriptor deck, Piletype position)
     {
-        piletypeToHolder[position].GetComponent<DeckRepresentation>().UpdateDeck(deck);
+        piletypeToHolder[position].GetComponent<CardOnFieldBoard>().UpdateDeck(deck);
     }
     void SetBoardValue(Transform field, int id, int cardCount)
     {
-        DeckRepresentation cardHolder = field.GetComponent<DeckRepresentation>();
+        CardOnFieldBoard cardHolder = field.GetComponent<CardOnFieldBoard>();
         cardHolder.owner = id;
         cardHolder.cardCount = cardCount;
         cardHolder.SetValues();

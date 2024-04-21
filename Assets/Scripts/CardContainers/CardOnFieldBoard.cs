@@ -4,7 +4,7 @@ using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
 
-public class DeckRepresentation : MonoBehaviour, CardContainer, RaycastableHolder
+public class CardOnFieldBoard : MonoBehaviour, CardContainer, RaycastableHolder
 {
     List<Card> cards = new List<Card>();
     bool mouseInTile = false;
@@ -35,7 +35,6 @@ public class DeckRepresentation : MonoBehaviour, CardContainer, RaycastableHolde
             UpdateCardPositions();
             return;
         }
-
         int insertPosition = Mathf.Min(cards.Count, (int)position);
         cards.Insert(insertPosition, card);
         UpdateCardPositions();

@@ -40,4 +40,8 @@ public class HelperFunctions : MonoBehaviour
 			GameObject.Destroy(child.gameObject);
 		}
     }
+    public static bool IsHoldingCTRL()
+    {
+        return Input.GetKey(KeyCode.LeftControl) || Input.GetKey(KeyCode.RightControl);
+    }
 }

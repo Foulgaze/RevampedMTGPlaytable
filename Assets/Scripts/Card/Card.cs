@@ -12,6 +12,7 @@ public class Card
 	Transform cardOnField = null;
 
 	public bool interactable = true;
+	public bool tapped = false;
 	public CardOnFieldComponents onFieldComponents {get;set;}
 
 	public CardContainer currentLocation {get;set;}
@@ -92,6 +93,35 @@ public class Card
 		}
 		cardOnField.gameObject.SetActive(true);
 	}
+
+	public void ClearStats()
+	{
+		tapped = false;
+		if(cardOnField != null)
+		{
+			UpdateTapUntap();
+		}
+	}
+
+	public void TapUntap()
+	{
+		tapped = !tapped;
+		UpdateTapUntap();
+	}
+	
+    public void UpdateTapUntap()
+    {
+        Transform cardOnField = GetCardOnField();
+        cardOnField.GetComponent<CardOnFieldComponents>().tappedSymbol.gameObject.SetActive(tapped);
+        if(tapped)
+        {
+            cardOnField.transform.rotation = Quaternion.Euler(new Vector3(0,gameManager.tapDegrees,0));
+        }
+        else
+        {
+            cardOnField.transform.rotation = Quaternion.Euler(new Vector3(0,0,0));
+        }
+    }
 
 	public void DisableOnFieldCard()
 	{
