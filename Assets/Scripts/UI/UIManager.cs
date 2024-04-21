@@ -40,6 +40,8 @@ public class UIManager : MonoBehaviour
 
     [SerializeField]
     DisplayDeckController revealHolder;
+    [SerializeField]
+    Transform cardOnFieldRightClickMenu;
 
     public Transform unusedCardHolder;
     public DisplayDeckController libraryBoxController;
@@ -50,15 +52,30 @@ public class UIManager : MonoBehaviour
     bool ready = false;
 
 
-    
+    void DisableRightClickMenus()
+    {
+        libraryPileRightClickMenu.gameObject.SetActive(false);
+        genericPileRightClickMenu.gameObject.SetActive(false);
+        cardOnFieldRightClickMenu.gameObject.SetActive(false);
+    }
+    bool InSpecificMenu(Transform menu)
+    {
+        return RectTransformUtility.RectangleContainsScreenPoint(menu.GetComponent<RectTransform>(), Input.mousePosition) && menu.gameObject.activeInHierarchy;
+    }
+    bool MouseInMenu()
+    {
+        bool inLibraryPileMenu = InSpecificMenu(libraryPileRightClickMenu);
+        bool inGenericPileMenu = InSpecificMenu(genericPileRightClickMenu);
+        bool inCardOnFieldRightClickMenu = InSpecificMenu(cardOnFieldRightClickMenu);
+        return inLibraryPileMenu || inGenericPileMenu || inCardOnFieldRightClickMenu;
+    }
     void Update()
     {
-        if((Input.GetMouseButtonDown(0) || Input.GetMouseButtonDown(1)) && libraryPileRightClickMenu.gameObject.activeSelf) // Technically should cache rt perhaps and cam main
+        if(Input.GetMouseButtonDown(0) || Input.GetMouseButtonDown(1)) // Technically should cache rt perhaps and cam main
         {
-            if(!RectTransformUtility.RectangleContainsScreenPoint(libraryPileRightClickMenu.GetComponent<RectTransform>(), Input.mousePosition))
+            if(!MouseInMenu())
             {
-                libraryPileRightClickMenu.gameObject.SetActive(false);
-                genericPileRightClickMenu.gameObject.SetActive(false);
+                DisableRightClickMenus();
             }
         }
     }
@@ -122,8 +139,9 @@ public class UIManager : MonoBehaviour
         drawCardBox.gameObject.SetActive(false);
     }
 
-    public void EnableRightClickMenu(Deck deck,Transform menuTransform )
+    public void EnableLibraryRightClickMenu(Deck deck,Transform menuTransform )
     {
+        DisableRightClickMenus();
         currentSelectedDeck = deck;
         menuTransform.gameObject.SetActive(true);
         RectTransform menu = menuTransform.GetComponent<RectTransform>();
@@ -131,14 +149,6 @@ public class UIManager : MonoBehaviour
         menu.position = Input.mousePosition + new Vector3(menu.sizeDelta.x/2,menu.sizeDelta.y/2 ,0);
     }
 
-    // public void EnableRightClickMenu(Deck deck)
-    // {
-    //     currentSelectedDeck = deck;
-    //     rightClickMenu.gameObject.SetActive(true);
-    //     RectTransform menu = rightClickMenu.GetComponent<RectTransform>();
-    //     rightClickMenu.SetAsLastSibling();
-    //     menu.position = Input.mousePosition + new Vector3(menu.sizeDelta.x/2,menu.sizeDelta.y/2 ,0);
-    // }
 
     public void DisableRightClickMenu()
     {
@@ -238,5 +248,15 @@ public class UIManager : MonoBehaviour
             List<Card> cardsToRender = deck.cards.GetRange(deck.cards.Count - cardMax, cardMax);
             revealHolder.LoadPile(deck,cardsToRender,false);
         }
+    }
+
+    public void SpawnCardOnFieldMenu(Card card)
+    {
+        DisableRightClickMenus();
+        cardOnFieldRightClickMenu.gameObject.SetActive(true);
+        cardOnFieldRightClickMenu.GetComponent<OnFieldCardRightClickController>().card = card;
+        RectTransform menu = cardOnFieldRightClickMenu.GetComponent<RectTransform>();
+        cardOnFieldRightClickMenu.SetAsLastSibling();
+        menu.position = Input.mousePosition + new Vector3(menu.sizeDelta.x/2,menu.sizeDelta.y/2 ,0);
     }
 }

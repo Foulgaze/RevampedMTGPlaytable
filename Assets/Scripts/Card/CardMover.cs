@@ -43,40 +43,26 @@ public class CardMover : MonoBehaviour, IPointerDownHandler, IPointerEnterHandle
 
       public void OnPointerDown(PointerEventData eventData)
     {
-        if(handManager.IsHoldingCard() || !GameManager.Instance.gameInteractable || eventData.button != PointerEventData.InputButton.Left || !card.interactable)
+        if(handManager.IsHoldingCard() || !GameManager.Instance.gameInteractable || !card.interactable)
         {
             return;
         }
-        
+        if(eventData.button != PointerEventData.InputButton.Left)
+        {
+            if(!handManager.CardInHand(card))
+            {
+                GameManager.Instance._uiManager.SpawnCardOnFieldMenu(this.card);
+            }
+            return;
+        }
+        if(HelperFunctions.IsHoldingCTRL() && !handManager.CardInHand(card))
+        {
+            card.TapUntap();
+            return;
+        }
         handManager.BeginCardDrag(card, eventData.position - (Vector2)transform.position);
  
 
-    }
-
-
-    // public void OnPointerUp(PointerEventData eventData)
-    // {
-    //     Debug.Log("Letting Go!");
-    //     if(!isDragging)
-    //     {
-    //         return;
-    //     }
-    //     isDragging = false;
-    //     handManager.ReleaseCard();
-    //     HoverCard();
-    // }
-
-    public void ReleaseCard()
-    {
-    }
-
-    public void Disable()
-    {
-
-    }
-    public void Enable()
-    {
- 
     }
 
 }

@@ -50,10 +50,7 @@ public class PlayerController : MonoBehaviour
         
     }
 
-    bool IsHoldingCTRL()
-    {
-        return Input.GetKey(KeyCode.LeftControl) || Input.GetKey(KeyCode.RightControl);
-    }
+    
 
     public void ShuffleDeck()
     {
@@ -123,6 +120,18 @@ public class PlayerController : MonoBehaviour
         TransferXCards(userInput, GameManager.Instance.clientPlayer.exile);
     }
 
+    public void TapUntapCard(OnFieldCardRightClickController controller)
+    {
+        Card card = controller.card;
+        if(card == null)
+        {
+            Debug.LogError("Null card passed to tap/untap");
+            return;
+        }
+        card.TapUntap();
+    }
+
+
     public void TransferXCards(TMP_InputField userInput, Deck resultDeck)
     {
         int result;
@@ -153,15 +162,15 @@ public class PlayerController : MonoBehaviour
         {
             return;
         }
-        if(IsHoldingCTRL() && Input.GetKeyDown(KeyCode.D) && GameManager.Instance._gameStarted)
+        if(HelperFunctions.IsHoldingCTRL() && Input.GetKeyDown(KeyCode.D) && GameManager.Instance._gameStarted)
         {
            DrawCard();
         }
-        if(IsHoldingCTRL() && Input.GetKeyDown(KeyCode.E) && GameManager.Instance._gameStarted)
+        if(HelperFunctions.IsHoldingCTRL() && Input.GetKeyDown(KeyCode.E) && GameManager.Instance._gameStarted)
         {
            GameManager.Instance._uiManager.EnableDrawCardsBox();
         }
-        if(IsHoldingCTRL() && Input.GetKeyDown(KeyCode.S))
+        if(HelperFunctions.IsHoldingCTRL() && Input.GetKeyDown(KeyCode.S))
         {
             ShuffleDeck();
         }

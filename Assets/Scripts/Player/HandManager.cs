@@ -149,6 +149,7 @@ public class HandManager : MonoBehaviour, CardContainer
     
     public void AddCardToContainer(Card card, int? position)
     {
+        card.ClearStats();
         card.currentLocation = this;
         int inputPosition = position == null ? cards.Count : (int)position;
         SetupRectForHand(card.GetInHandRect(), card);
@@ -244,7 +245,7 @@ public class HandManager : MonoBehaviour, CardContainer
 
     bool IsRightClickingPile()
     {
-        return Input.GetMouseButtonDown(1) && !IsHoldingCard() && lastHoveredPile != null && lastHoveredPile.GetComponent<DeckRepresentation>() == null;
+        return Input.GetMouseButtonDown(1) && !IsHoldingCard() && lastHoveredPile != null && lastHoveredPile.GetComponent<CardOnFieldBoard>() == null;
     }
 
 
@@ -265,11 +266,11 @@ public class HandManager : MonoBehaviour, CardContainer
             CardOnFieldContainer cardOnFieldContainer = lastHoveredPile.GetComponent<CardOnFieldContainer>();
             if(cardOnFieldContainer.deck.deckID == Piletype.graveyard || cardOnFieldContainer.deck.deckID == Piletype.exile)
             {
-                GameManager.Instance._uiManager.EnableRightClickMenu(lastHoveredPile.GetComponent<CardOnFieldContainer>().deck, GameManager.Instance._uiManager.genericPileRightClickMenu);
+                GameManager.Instance._uiManager.EnableLibraryRightClickMenu(lastHoveredPile.GetComponent<CardOnFieldContainer>().deck, GameManager.Instance._uiManager.genericPileRightClickMenu);
             }
             else
             {
-                GameManager.Instance._uiManager.EnableRightClickMenu(lastHoveredPile.GetComponent<CardOnFieldContainer>().deck, GameManager.Instance._uiManager.libraryPileRightClickMenu);
+                GameManager.Instance._uiManager.EnableLibraryRightClickMenu(lastHoveredPile.GetComponent<CardOnFieldContainer>().deck, GameManager.Instance._uiManager.libraryPileRightClickMenu);
             }
             
         }
