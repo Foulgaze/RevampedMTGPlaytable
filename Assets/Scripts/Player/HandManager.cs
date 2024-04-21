@@ -262,7 +262,16 @@ public class HandManager : MonoBehaviour, CardContainer
 
         if(IsRightClickingPile())
         {
-            GameManager.Instance._uiManager.EnableRightClickMenu(lastHoveredPile.GetComponent<CardOnFieldContainer>().deck);
+            CardOnFieldContainer cardOnFieldContainer = lastHoveredPile.GetComponent<CardOnFieldContainer>();
+            if(cardOnFieldContainer.deck.deckID == Piletype.graveyard || cardOnFieldContainer.deck.deckID == Piletype.exile)
+            {
+                GameManager.Instance._uiManager.EnableRightClickMenu(lastHoveredPile.GetComponent<CardOnFieldContainer>().deck, GameManager.Instance._uiManager.genericPileRightClickMenu);
+            }
+            else
+            {
+                GameManager.Instance._uiManager.EnableRightClickMenu(lastHoveredPile.GetComponent<CardOnFieldContainer>().deck, GameManager.Instance._uiManager.libraryPileRightClickMenu);
+            }
+            
         }
         CheckForPile();
         

@@ -23,9 +23,8 @@ public class UIManager : MonoBehaviour
     TextMeshProUGUI readyUpText;
     [SerializeField]
     TMP_InputField deckLoad;
-
-    [SerializeField]
-    Transform rightClickMenu;
+    public Transform libraryPileRightClickMenu;
+    public Transform genericPileRightClickMenu;
 
     [SerializeField]
     Transform drawCardBox;
@@ -54,11 +53,12 @@ public class UIManager : MonoBehaviour
     
     void Update()
     {
-        if((Input.GetMouseButtonDown(0) || Input.GetMouseButtonDown(1)) && rightClickMenu.gameObject.activeSelf) // Technically should cache rt perhaps and cam main
+        if((Input.GetMouseButtonDown(0) || Input.GetMouseButtonDown(1)) && libraryPileRightClickMenu.gameObject.activeSelf) // Technically should cache rt perhaps and cam main
         {
-            if(!RectTransformUtility.RectangleContainsScreenPoint(rightClickMenu.GetComponent<RectTransform>(), Input.mousePosition))
+            if(!RectTransformUtility.RectangleContainsScreenPoint(libraryPileRightClickMenu.GetComponent<RectTransform>(), Input.mousePosition))
             {
-                rightClickMenu.gameObject.SetActive(false);
+                libraryPileRightClickMenu.gameObject.SetActive(false);
+                genericPileRightClickMenu.gameObject.SetActive(false);
             }
         }
     }
@@ -122,18 +122,27 @@ public class UIManager : MonoBehaviour
         drawCardBox.gameObject.SetActive(false);
     }
 
-    public void EnableRightClickMenu(Deck deck)
+    public void EnableRightClickMenu(Deck deck,Transform menuTransform )
     {
         currentSelectedDeck = deck;
-        rightClickMenu.gameObject.SetActive(true);
-        RectTransform menu = rightClickMenu.GetComponent<RectTransform>();
-        rightClickMenu.SetAsLastSibling();
+        menuTransform.gameObject.SetActive(true);
+        RectTransform menu = menuTransform.GetComponent<RectTransform>();
+        menuTransform.SetAsLastSibling();
         menu.position = Input.mousePosition + new Vector3(menu.sizeDelta.x/2,menu.sizeDelta.y/2 ,0);
     }
 
+    // public void EnableRightClickMenu(Deck deck)
+    // {
+    //     currentSelectedDeck = deck;
+    //     rightClickMenu.gameObject.SetActive(true);
+    //     RectTransform menu = rightClickMenu.GetComponent<RectTransform>();
+    //     rightClickMenu.SetAsLastSibling();
+    //     menu.position = Input.mousePosition + new Vector3(menu.sizeDelta.x/2,menu.sizeDelta.y/2 ,0);
+    // }
+
     public void DisableRightClickMenu()
     {
-        rightClickMenu.gameObject.SetActive(false);
+        libraryPileRightClickMenu.gameObject.SetActive(false);
     }
 
     public Transform ShowLibrary()
