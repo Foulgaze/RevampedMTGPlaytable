@@ -29,4 +29,17 @@ public class CardManager : MonoBehaviour
         GameManager.Instance.idToCard[newCard.id] = newCard;
         return newCard;
     }
+
+    public static Card CopyCard(Card card)
+    {
+        if(!GameManager.Instance.nameToCardInfo.ContainsKey(card.info.name))
+        {
+            return null;
+        }
+        Card newCard = new Card(card,cardID++, GameManager.Instance.nameToCardInfo[card.info.name], GameManager.Instance);
+        GameManager.Instance.idToCard[newCard.id] = newCard;
+        return newCard;
+
+
+    }
 }

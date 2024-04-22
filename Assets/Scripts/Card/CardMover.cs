@@ -11,6 +11,7 @@ public class CardMover : MonoBehaviour, IPointerDownHandler, IPointerEnterHandle
 
     void Start()
     {
+        Debug.Log("Starting");
         handManager = GameManager.Instance.handManager;
     }
 

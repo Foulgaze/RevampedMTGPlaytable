@@ -6,7 +6,7 @@ using UnityEngine;
 
 public class CardOnFieldBoard : MonoBehaviour, CardContainer, RaycastableHolder
 {
-    List<Card> cards = new List<Card>();
+    public List<Card> cards = new List<Card>();
     bool mouseInTile = false;
 
     float percentageOfCardAsSpacer = 0.25f;

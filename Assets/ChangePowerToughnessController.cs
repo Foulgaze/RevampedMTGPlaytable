@@ -46,7 +46,7 @@ public class ChangePowerToughnessController : MonoBehaviour
         {
             card.toughness = newValue;
         }
-        card.DisplayPowerToughness();
+        card.DisplayPowerToughness(true);
     }
     int ChangePowerToughness(string text,bool? increase )
     {

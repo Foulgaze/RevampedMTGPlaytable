@@ -15,7 +15,7 @@ public class CardOnFieldContainer : MonoBehaviour, RaycastableHolder
 
     public void EnterMouseOver()
     {
-        if(!GameManager.Instance.clientPlayer.hand.IsHoldingCard() || GameManager.Instance.clientPlayer.id != deck.owner)
+        if(!GameManager.Instance.clientPlayer.hand.IsHoldingCard() || GameManager.Instance.clientPlayer.id != deck.owner || GameManager.Instance.handManager.heldCard.ethereal)
         {
             return;
         }

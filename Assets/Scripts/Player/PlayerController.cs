@@ -49,7 +49,6 @@ public class PlayerController : MonoBehaviour
         GameManager.Instance.SendUpdatedDecks();
         
     }
-
     
 
     public void ShuffleDeck()
@@ -153,6 +152,12 @@ public class PlayerController : MonoBehaviour
             resultDeck.AddCard(drawnCard);
         }
         GameManager.Instance.SendUpdatedDecks();
+    }
+
+    public void CloneCard(OnFieldCardRightClickController controller)
+    {
+        Card card = controller.card;
+
     }
 
     // Update is called once per frame
