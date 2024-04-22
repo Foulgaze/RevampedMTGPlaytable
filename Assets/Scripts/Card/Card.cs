@@ -11,17 +11,39 @@ public class Card
 	RectTransform inHandCardRect = null;
 	Transform cardOnField = null;
 
+	public int power;
+	public int toughness;
+
 	public bool interactable = true;
 	public bool tapped = false;
-	public CardOnFieldComponents onFieldComponents {get;set;}
 
-	public CardContainer currentLocation {get;set;}
-	public CardContainer originLocation {get;set;}
 	public Card(int id,CardInfo info, GameManager gameManager)
 	{
 		this.id = id;
 		this.info = info;
 		this.gameManager = gameManager;
+		UpdatePowerToughness();
+	}
+
+	void UpdatePowerToughness()
+	{
+		int result = 0;
+		int.TryParse(info.power, out result);
+		power = result;
+		int.TryParse(info.toughness, out result);
+		toughness = result;
+	}
+
+	public void DisplayPowerToughness()
+	{
+		if(cardOnField == null || !cardOnField.gameObject.activeInHierarchy)
+		{
+			return;
+		}
+		Transform physicalCard = GetCardOnField();
+		CardOnFieldComponents components = physicalCard.GetComponent<CardOnFieldComponents>();
+		components.SetPowerToughnessState(true);
+		components.cardPowerToughness.text = $"{power}/{toughness}";
 	}
 
 	public RectTransform GetInHandRect()
@@ -99,7 +121,8 @@ public class Card
 		tapped = false;
 		if(cardOnField != null)
 		{
-			UpdateTapUntap();
+			GameObject.Destroy(cardOnField.gameObject);
+			cardOnField = null;
 		}
 	}
 

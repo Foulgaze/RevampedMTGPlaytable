@@ -18,4 +18,6 @@ public class CardOnFieldComponents : MonoBehaviour
     {
         cardPowerToughness.transform.parent.gameObject.SetActive(enabled);
     }
+
+    
 }

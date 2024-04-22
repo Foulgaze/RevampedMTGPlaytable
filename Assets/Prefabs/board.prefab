@@ -937,7 +937,7 @@ GameObject:
   - component: {fileID: 4323440895804688308}
   - component: {fileID: 5400421588217238310}
   - component: {fileID: 1292008529584386690}
-  - component: {fileID: 1576341595276779086}
+  - component: {fileID: 871426509426823291}
   m_Layer: 3
   m_Name: leftField
   m_TagString: GameController
@@ -1031,7 +1031,7 @@ BoxCollider:
   serializedVersion: 3
   m_Size: {x: 1, y: 1, z: 1}
   m_Center: {x: 0, y: 0, z: 0}
---- !u!114 &1576341595276779086
+--- !u!114 &871426509426823291
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}

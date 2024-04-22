@@ -23,6 +23,8 @@ public class UIManager : MonoBehaviour
     TextMeshProUGUI readyUpText;
     [SerializeField]
     TMP_InputField deckLoad;
+    [SerializeField]
+    ChangePowerToughnessController changePowerToughnessMenu;
     public Transform libraryPileRightClickMenu;
     public Transform genericPileRightClickMenu;
 
@@ -42,7 +44,7 @@ public class UIManager : MonoBehaviour
     DisplayDeckController revealHolder;
     [SerializeField]
     Transform cardOnFieldRightClickMenu;
-
+    bool skipDisablingMenus = false;
     public Transform unusedCardHolder;
     public DisplayDeckController libraryBoxController;
 
@@ -71,6 +73,11 @@ public class UIManager : MonoBehaviour
     }
     void Update()
     {
+        if(skipDisablingMenus)
+        {
+            skipDisablingMenus = false;
+            return;
+        }
         if(Input.GetMouseButtonDown(0) || Input.GetMouseButtonDown(1)) // Technically should cache rt perhaps and cam main
         {
             if(!MouseInMenu())
@@ -141,12 +148,20 @@ public class UIManager : MonoBehaviour
 
     public void EnableLibraryRightClickMenu(Deck deck,Transform menuTransform )
     {
+        skipDisablingMenus= true;
         DisableRightClickMenus();
         currentSelectedDeck = deck;
         menuTransform.gameObject.SetActive(true);
         RectTransform menu = menuTransform.GetComponent<RectTransform>();
         menuTransform.SetAsLastSibling();
         menu.position = Input.mousePosition + new Vector3(menu.sizeDelta.x/2,menu.sizeDelta.y/2 ,0);
+    }
+
+    public void EnableChangePowerToughnessMenu()
+    {
+        changePowerToughnessMenu.gameObject.SetActive(true);
+        OnFieldCardRightClickController controller = cardOnFieldRightClickMenu.GetComponent<OnFieldCardRightClickController>();
+        changePowerToughnessMenu.InitMenu(controller.card);
     }
 
 
@@ -253,6 +268,7 @@ public class UIManager : MonoBehaviour
     public void SpawnCardOnFieldMenu(Card card)
     {
         DisableRightClickMenus();
+        skipDisablingMenus = true;
         cardOnFieldRightClickMenu.gameObject.SetActive(true);
         cardOnFieldRightClickMenu.GetComponent<OnFieldCardRightClickController>().card = card;
         RectTransform menu = cardOnFieldRightClickMenu.GetComponent<RectTransform>();

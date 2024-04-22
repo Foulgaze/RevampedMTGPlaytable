@@ -150,7 +150,6 @@ public class HandManager : MonoBehaviour, CardContainer
     public void AddCardToContainer(Card card, int? position)
     {
         card.ClearStats();
-        card.currentLocation = this;
         int inputPosition = position == null ? cards.Count : (int)position;
         SetupRectForHand(card.GetInHandRect(), card);
         cards.Insert(inputPosition,card);
@@ -169,7 +168,6 @@ public class HandManager : MonoBehaviour, CardContainer
     }
     public void RemoveCardFromContainer(Card card)
     {
-        card.currentLocation = null;
         cards.Remove(card);
         UpdateCardPositions();
     }
