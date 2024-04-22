@@ -6,9 +6,30 @@ using System.Linq;
 using System;
 using Random = UnityEngine.Random;
 using System.Collections;
+
+/*
+TODO
+Currently all the sending of networked are done from this file.
+Any function that is called from network receiver is currently in this file.
+Should separate functionality into sender/receiver function files.
+Game Manager should soley be responsible for starting game stuff and sole point of info. 
+*/
+
+/*
+TODO
+Offload prefabs from gamemanager to file that actually uses it
+*/
+
+/*
+TODO
+Currently many of the networked functions perform the function locally, then send networked call. 
+The paradigm should be that nothing is ever done locally. Network calls should be sent out instead
+and then when the call is received it is done locally. 
+Fix functions that don't follow this.
+*/
 public enum NetworkInstruction
 {
-    playerConnection, readyUp, userDisconnect, setLobbySize, chatboxMessage, unReady, updateDecks, showLibrary, revealTopCard, millXCards
+    playerConnection, readyUp, userDisconnect, setLobbySize, chatboxMessage, unReady, updateDecks, showLibrary, revealTopCard, millXCards, copyCard, deleteCard
 }
 
 public class GameManager : MonoBehaviour
@@ -185,6 +206,57 @@ public class GameManager : MonoBehaviour
         return returnCards;
     }
 
+    public void SendDestroyCard(int cardID)
+    {
+        _networkManager.SendMessage(NetworkInstruction.deleteCard,cardID.ToString());
+    }
+
+    public void ReceiveDestroyCard(string strID)
+    {
+        int cardID;
+        if(!int.TryParse(strID, out cardID))
+        {
+            Debug.LogError($"Could not parse id - {strID}");
+            return;
+        }
+        if(!idToCard.ContainsKey(cardID))
+        {
+            Debug.LogError($"Could not find card id - {cardID}");
+            return;
+        }
+        idToCard[cardID].Destroy();
+    }
+
+    public void CopyCard(string uuid, string strID)
+    {
+        int id;
+        if(!int.TryParse(strID, out id))
+        {
+            Debug.LogError($"Cannot parse id - {strID}");
+            return;
+        }
+
+        if(!idToCard.ContainsKey(id))
+        {
+            Debug.LogError($"Cannot find card - {id}");
+            return;
+        }
+        if(!uuidToPlayer.ContainsKey(uuid))
+        {
+            Debug.LogError($"Cannot find player - {uuid}");
+            return;
+        }
+        Card copiedCard = CardManager.CopyCard(idToCard[id]);
+        Player player = uuidToPlayer[uuid];
+        (CardOnFieldBoard? boardContainingCard, int position) = player.boardScript.FindBoardContainingCard(id);
+        if(boardContainingCard == null)
+        {
+            Debug.LogError($"Cannot find board containing card - {copiedCard.id}");
+            return;
+        }
+        boardContainingCard.AddCardToContainer(copiedCard, position + 1);
+    }
+
 
 
 
@@ -281,6 +353,15 @@ public class GameManager : MonoBehaviour
         {
             StartGame();
         }
+    }
+
+    public void SendCopyCard(OnFieldCardRightClickController controller)
+    {
+        if(controller.card == null)
+        {
+            return;
+        }
+        _networkManager.SendMessage(NetworkInstruction.copyCard,controller.card.id.ToString() );
     }
 
     public void UnreadyUp(string uuid)

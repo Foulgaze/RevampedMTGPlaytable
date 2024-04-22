@@ -119,7 +119,16 @@ public class NetworkCommandHandler
                 GameManager.Instance.UpdateRevealDeck(msgUUID);
                 break;
             }
-            
+            case (int) NetworkInstruction.copyCard:
+            {
+                GameManager.Instance.CopyCard(msgUUID, instruction);
+                break;
+            }
+            case (int) NetworkInstruction.deleteCard:
+            {
+                GameManager.Instance.ReceiveDestroyCard(instruction);
+                break;
+            }            
         }
     }
 }

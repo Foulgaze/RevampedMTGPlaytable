@@ -4,7 +4,9 @@ using System.Linq;
 using UnityEngine;
 using UnityEngine.EventSystems;
 using Image = UnityEngine.UI.Image;
-
+// TODO
+// The hand manager, and card moving functionality should not be in the same file.
+// Should separate into hand container, and card mover controller. 
 public class HandManager : MonoBehaviour, CardContainer
 {
     List<Card> cards = new List<Card>();
@@ -114,10 +116,28 @@ public class HandManager : MonoBehaviour, CardContainer
         AddCardToContainer(card,insertPosition);
     }
 
-    public void ReleaseCard()
+    public void ReleaseCard() // Honestly this whole function should be in a separate file.
     {
+        
         bool inside = HelperFunctions.IsPointInRectTransform(Input.mousePosition, _checkHandBox, null);
-        if(inside)
+        if(heldCard.ethereal) // TODO Refactor, ugly
+        {
+            bool released = false;
+            if(lastHoveredPile != null)
+            {
+                CardContainer container = lastHoveredPile.GetComponent<CardContainer>();
+                if(container != null)
+                {
+                    container.ReleaseCardInBox(heldCard);
+                    released = true;
+                }
+            }
+            if(!released)
+            {
+                GameManager.Instance.SendDestroyCard(heldCard.id);
+            }
+        }
+        else if(inside)
         {
             ReleaseCardInBox(heldCard);
             UpdateCardPositions();
@@ -224,7 +244,7 @@ public class HandManager : MonoBehaviour, CardContainer
 
     void DragCard()
     {
-        if(lastHoveredPile != null)
+        if(lastHoveredPile != null && !heldCard.ethereal)
         {
             return;
         }
@@ -276,6 +296,7 @@ public class HandManager : MonoBehaviour, CardContainer
         
     }
 
+    // TODO Should probably be its own file. Also very ugly must be a better way to write
     void CheckForPile()
     {
         if(IsHoldingCard() && CardInDeckDisplayView() && GameManager.Instance._uiManager.libraryBoxController.interactable)

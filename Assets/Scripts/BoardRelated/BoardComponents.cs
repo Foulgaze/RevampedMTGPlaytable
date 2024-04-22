@@ -54,6 +54,38 @@ public class BoardComponents : MonoBehaviour
         return returnDeck;
     }
 
+    public (CardOnFieldBoard?, int) FindBoardContainingCard(int id)
+    {
+        int count = 0;
+        foreach(Card iterCard in mainField.GetComponent<CardOnFieldBoard>().cards)
+        {
+            if(iterCard.id == id )
+            {
+                return (mainField.GetComponent<CardOnFieldBoard>(), count);
+            }
+            count += 1;
+        }
+        count = 0;
+        foreach(Card iterCard in leftField.GetComponent<CardOnFieldBoard>().cards)
+        {
+            if(iterCard.id == id )
+            {
+                return (leftField.GetComponent<CardOnFieldBoard>(), count);
+            }
+            count += 1;
+        }
+        count = 0;
+        foreach(Card iterCard in rightField.GetComponent<CardOnFieldBoard>().cards)
+        {
+            if(iterCard.id == id )
+            {
+                return (rightField.GetComponent<CardOnFieldBoard>(), count);
+            }
+            count += 1;
+        }
+        return (null, 0);
+    }
+
     public void SetValues()
     {
         if(isEnemyBoard)

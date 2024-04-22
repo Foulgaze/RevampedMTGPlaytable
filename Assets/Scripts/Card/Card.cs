@@ -1,4 +1,5 @@
 using System.Linq;
+using System.Security.Cryptography;
 using UnityEngine;
 using Image = UnityEngine.UI.Image;
 public class Card
@@ -16,6 +17,7 @@ public class Card
 
 	public bool interactable = true;
 	public bool tapped = false;
+	public bool ethereal = false;
 
 	public Card(int id,CardInfo info, GameManager gameManager)
 	{
@@ -25,6 +27,25 @@ public class Card
 		UpdatePowerToughness();
 	}
 
+	public Card(Card card, int id,CardInfo info, GameManager gameManager)
+	{
+		// Needs to be refactored
+		this.id = id;
+		this.info = info;
+		this.gameManager = gameManager;
+
+		this.power = card.power;
+		this.toughness = card.toughness;
+		this.ethereal = true;
+		this.tapped = card.tapped;
+		bool ptEnabled = card.GetCardOnField().GetComponent<CardOnFieldComponents>().cardPowerToughness.gameObject.activeInHierarchy;
+		GetCardOnField();
+		DisplayPowerToughness(ptEnabled);
+		UpdateTapUntap();
+		RectTransform inHand = GetInHandRect();
+		DisableRect();
+		inHand.SetParent(gameManager.handManager._handParent);
+	}
 	void UpdatePowerToughness()
 	{
 		int result = 0;
@@ -34,7 +55,19 @@ public class Card
 		toughness = result;
 	}
 
-	public void DisplayPowerToughness()
+	public void Destroy()
+	{
+		if(inHandCardRect != null)
+		{
+			GameObject.Destroy(inHandCardRect.gameObject);
+		}
+		if(cardOnField != null)
+		{
+			GameObject.Destroy(cardOnField.gameObject);
+		}
+	}
+
+	public void DisplayPowerToughness(bool enablePTVisual)
 	{
 		if(cardOnField == null || !cardOnField.gameObject.activeInHierarchy)
 		{
@@ -42,7 +75,10 @@ public class Card
 		}
 		Transform physicalCard = GetCardOnField();
 		CardOnFieldComponents components = physicalCard.GetComponent<CardOnFieldComponents>();
-		components.SetPowerToughnessState(true);
+		if(enablePTVisual)
+		{
+			components.SetPowerToughnessState(true);
+		}
 		components.cardPowerToughness.text = $"{power}/{toughness}";
 	}
 
