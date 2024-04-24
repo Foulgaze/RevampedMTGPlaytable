@@ -6,6 +6,7 @@ using UnityEngine.Networking;
 using UnityEngine.UI;
 using System.Linq;
 using System;
+using System.Web;
 
 public class TextureLoader : MonoBehaviour
 {
@@ -55,6 +56,7 @@ public class TextureLoader : MonoBehaviour
         Sprite sprite = Sprite.Create(texture, new Rect(0, 0, texture.width, texture.height), Vector2.one * 0.5f);
         return sprite;
     }
+    // TODO make multiple sources that images can be gathered from. 
     public IEnumerator GetSprite(string setCode, string cardNo, string name, Queue<Card> toBeTextured)
     {
         string filepath = $"Assets/Resources/Textures/{setCode}{cardNo}.jpg";
@@ -66,14 +68,21 @@ public class TextureLoader : MonoBehaviour
         // }
 
         string url = $"https://api.scryfall.com/cards/{setCode.ToLower()}/{cardNo}?format=image&version=normal&face=front";
+        string backupUrl = $"https://api.scryfall.com/cards/named?exact={HttpUtility.UrlEncode(name)}&format=image";
+        
 
         UnityWebRequest textureRequest = UnityWebRequestTexture.GetTexture(url);
         yield return textureRequest.SendWebRequest();
 
         if (textureRequest.result != UnityWebRequest.Result.Success)
         {
-            Debug.Log($"{url} Error"); 
-            yield break;
+            textureRequest = UnityWebRequestTexture.GetTexture(backupUrl);
+            yield return textureRequest.SendWebRequest();
+            if (textureRequest.result != UnityWebRequest.Result.Success)
+            {
+                Debug.Log($"Both URLS failed to fetch tectures #1={url} #2={backupUrl}"); 
+                yield break;
+            }
         }
         
         Texture2D myTexture = ((DownloadHandlerTexture)textureRequest.downloadHandler).texture;
