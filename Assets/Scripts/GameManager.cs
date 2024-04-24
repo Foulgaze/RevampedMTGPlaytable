@@ -29,7 +29,7 @@ Fix functions that don't follow this.
 */
 public enum NetworkInstruction
 {
-    playerConnection, readyUp, userDisconnect, setLobbySize, chatboxMessage, unReady, updateDecks, showLibrary, revealTopCard, millXCards, copyCard, deleteCard
+    playerConnection, readyUp, userDisconnect, setLobbySize, chatboxMessage, unReady, updateDecks, showLibrary, revealTopCard, millXCards, copyCard, deleteCard, tapUnap, ChangePowerToughness
 }
 
 public class GameManager : MonoBehaviour
@@ -39,7 +39,7 @@ public class GameManager : MonoBehaviour
     // Should be defined outside of file
     const string _server = "127.0.0.1";
     const int _port = 54000;
-    int _readyUpNeeded = 2;
+    public int _readyUpNeeded = 1;
 
     // Player Stuff
     int readyUpCount = 0;
@@ -440,4 +440,61 @@ public class GameManager : MonoBehaviour
         _networkManager.SendMessage(NetworkInstruction.unReady);
     }
 
+    public void SendTapUntap(Card card)
+	{
+        _networkManager.SendMessage(NetworkInstruction.tapUnap, card.id.ToString());
+	}
+    public void ReceiveTapUnTap(string strID)
+    {
+        int cardID;
+        if(!int.TryParse(strID, out cardID))
+        {
+            Debug.LogError($"Could not parse card ID - {strID}");
+            return;
+        }   
+        if(!idToCard.ContainsKey(cardID))
+        {
+            Debug.LogError($"Could not find card id - {cardID}");
+            return;
+        }
+        idToCard[cardID].TapUntap();
+    }
+
+    public void SendChangePowerToughness(bool power, Card card, int value)
+    {
+        string valueChanged = power ? "power" : "toughness";
+        _networkManager.SendMessage(NetworkInstruction.ChangePowerToughness, $"{valueChanged}:{card.id}:{value}");
+    }
+
+    public void ReceieveChangePowerToughness(string changeInstruction)
+    {
+        string[] changes = changeInstruction.Split(":");
+        int cardID;
+        int newValue;
+        if(changes.Count() != 3)
+        {
+            Debug.LogError($"Improper formatting - {changeInstruction}");
+            return;
+        }
+        if(!int.TryParse(changes[1], out cardID) || !idToCard.ContainsKey(cardID) )
+        {
+            Debug.LogError($"Invalid card ID - {changeInstruction} - [{changes[1]}]");
+            return;
+        }
+        if(!int.TryParse(changes[2], out newValue))
+        {
+            Debug.LogError($"Invalid power/toughness - {changeInstruction} - [{changes[2]}]");
+            return;
+        }
+        Card card = idToCard[cardID];
+        if(changes[0] == "power")
+        {
+            card.power = newValue;
+        }   
+        else
+        {
+            card.toughness = newValue;
+        }
+        card.DisplayPowerToughness(true);
+    }
 }

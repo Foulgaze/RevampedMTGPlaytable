@@ -128,7 +128,17 @@ public class NetworkCommandHandler
             {
                 GameManager.Instance.ReceiveDestroyCard(instruction);
                 break;
-            }            
+            }         
+            case (int) NetworkInstruction.tapUnap:
+            {
+                GameManager.Instance.ReceiveTapUnTap(instruction);
+                break;
+            }   
+            case (int) NetworkInstruction.ChangePowerToughness:
+            {
+                GameManager.Instance.ReceieveChangePowerToughness(instruction);
+                break;
+            }   
         }
     }
 }

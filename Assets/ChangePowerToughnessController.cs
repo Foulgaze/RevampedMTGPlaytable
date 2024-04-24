@@ -38,7 +38,8 @@ public class ChangePowerToughnessController : MonoBehaviour
     void SetNewValue(TMP_InputField input, int newValue)
     {
         input.text = $"{newValue}";
-        if(input == powerField)
+        bool changingPower = input == powerField;
+        if(changingPower)
         {
             card.power = newValue;
         }
@@ -46,7 +47,8 @@ public class ChangePowerToughnessController : MonoBehaviour
         {
             card.toughness = newValue;
         }
-        card.DisplayPowerToughness(true);
+        GameManager.Instance.SendChangePowerToughness(changingPower, card, newValue);
+        // card.DisplayPowerToughness(true);
     }
     int ChangePowerToughness(string text,bool? increase )
     {
