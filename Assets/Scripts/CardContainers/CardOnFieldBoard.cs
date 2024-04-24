@@ -97,12 +97,13 @@ public class CardOnFieldBoard : MonoBehaviour, CardContainer, RaycastableHolder
         PrepareForHover();
     }
 
-    public void UpdateDeck(DeckDescriptor deck)
+    public void UpdateDeck(DeckDescriptor deck, HashSet<Card> cardsAlreadyOnBoard)
     {
         cards.Clear();
         foreach(int cardNumber in deck.cards)
         {
             Card card = GameManager.Instance.idToCard[cardNumber];
+            cardsAlreadyOnBoard.Remove(card);
             if(card is null)
             {
                 Debug.LogError($"Could not load card id {cardNumber}");

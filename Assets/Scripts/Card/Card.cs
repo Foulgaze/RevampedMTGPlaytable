@@ -158,9 +158,13 @@ public class Card
 		if(cardOnField != null)
 		{
 			GameObject.Destroy(cardOnField.gameObject);
+			UpdatePowerToughness();
 			cardOnField = null;
 		}
 	}
+
+
+
 
 	public void TapUntap()
 	{

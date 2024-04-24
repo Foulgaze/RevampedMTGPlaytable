@@ -2,6 +2,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using System;
+using Unity.VisualScripting;
 
 public enum Piletype {graveyard, library, exile, leftField, rightField, mainField}
 public class BoardComponents : MonoBehaviour
@@ -85,6 +86,16 @@ public class BoardComponents : MonoBehaviour
         }
         return (null, 0);
     }
+    
+    public HashSet<Card> GetAllCardsOnBoard()
+    {
+        HashSet<Card> cardsOnBoard = new HashSet<Card>();
+        foreach(Transform transform in new Transform[]{leftField, rightField, mainField})
+        {
+            cardsOnBoard.AddRange(GetCardOnFieldBoard(transform).cards);
+        }
+        return cardsOnBoard;
+    }
 
     public void SetValues()
     {
@@ -106,14 +117,19 @@ public class BoardComponents : MonoBehaviour
         SetBoardValue(mainField, id, 8);
     }
 
-    public DeckDescriptor GetDeckDescriptor(Piletype position)
+    CardOnFieldBoard GetCardOnFieldBoard(Transform passedBoard)
     {
-        return piletypeToHolder[position].GetComponent<CardOnFieldBoard>().GetDeckDescription(position);
+        return passedBoard.GetComponent<CardOnFieldBoard>();
     }
 
-    public void UpdateDeck(DeckDescriptor deck, Piletype position)
+    public DeckDescriptor GetDeckDescriptor(Piletype position)
     {
-        piletypeToHolder[position].GetComponent<CardOnFieldBoard>().UpdateDeck(deck);
+        return GetCardOnFieldBoard(piletypeToHolder[position]).GetDeckDescription(position);
+    }
+
+    public void UpdateDeck(DeckDescriptor deck, Piletype position, HashSet<Card> cardsAlreadyOnBoard)
+    {
+        GetCardOnFieldBoard(piletypeToHolder[position]).UpdateDeck(deck, cardsAlreadyOnBoard);
     }
     void SetBoardValue(Transform field, int id, int cardCount)
     {

@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using Unity.VisualScripting;
 using UnityEngine;
 
 public class Player
@@ -35,6 +36,8 @@ public class Player
         this.graveyard.LateConstructor(Piletype.graveyard, id, $"{name}'s graveyard");
 
     }
+
+
 
     public bool DrawCard()
     {
@@ -75,6 +78,7 @@ public class Player
 
     public void UpdateDecks(Dictionary<int, DeckDescriptor> newDecks)
     {
+        HashSet<Card> allCards = boardScript.GetAllCardsOnBoard();
         foreach(int deck in newDecks.Keys)
         {
             DeckDescriptor currDescriptor = newDecks[deck];
@@ -90,15 +94,19 @@ public class Player
                     exile.UpdateDeck(newDecks[deck]);
                     break;
                 case (int) Piletype.leftField:
-                    boardScript.UpdateDeck(currDescriptor, Piletype.leftField);
+                    boardScript.UpdateDeck(currDescriptor, Piletype.leftField, allCards);
                     break;
                 case (int) Piletype.mainField:
-                    boardScript.UpdateDeck(currDescriptor, Piletype.mainField);
+                    boardScript.UpdateDeck(currDescriptor, Piletype.mainField, allCards);
                     break;
                 case (int) Piletype.rightField:
-                    boardScript.UpdateDeck(currDescriptor, Piletype.rightField);
+                    boardScript.UpdateDeck(currDescriptor, Piletype.rightField, allCards);
                     break;
             }
+        }
+        foreach(Card card in allCards)
+        {
+            card.ClearStats();
         }
     }
 
