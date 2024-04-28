@@ -5,11 +5,11 @@ using Image = UnityEngine.UI.Image;
 public class CardTexture
 {
     public Queue<Card> cardsToBeTextured {get;} = new Queue<Card>();
-    public CardInfo cardInfo {get;}
+    public Card card {get;}
 
     public CardTexture(Card card)
     {
-        this.cardInfo = card.info;
+        this.card = card;
         cardsToBeTextured.Enqueue(card);
     }
 }

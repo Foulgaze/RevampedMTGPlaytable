@@ -43,7 +43,10 @@ public class UIManager : MonoBehaviour
     [SerializeField]
     DisplayDeckController revealHolder;
     [SerializeField]
-    Transform cardOnFieldRightClickMenu;
+    OnFieldCardRightClickController cardOnFieldRightClickMenu;
+
+    [SerializeField]
+    RelatedCardsController relatedCardsController;
     bool skipDisablingMenus = false;
     public Transform unusedCardHolder;
     public DisplayDeckController libraryBoxController;
@@ -68,7 +71,7 @@ public class UIManager : MonoBehaviour
     {
         bool inLibraryPileMenu = InSpecificMenu(libraryPileRightClickMenu);
         bool inGenericPileMenu = InSpecificMenu(genericPileRightClickMenu);
-        bool inCardOnFieldRightClickMenu = InSpecificMenu(cardOnFieldRightClickMenu);
+        bool inCardOnFieldRightClickMenu = InSpecificMenu(cardOnFieldRightClickMenu.transform);
         return inLibraryPileMenu || inGenericPileMenu || inCardOnFieldRightClickMenu;
     }
     void Update()
@@ -265,6 +268,11 @@ public class UIManager : MonoBehaviour
         }
     }
 
+    public void EnableRelatedCardsMenu(OnFieldCardRightClickController menu)
+    {
+        relatedCardsController.InitMenu(menu);
+    }
+
     public void SpawnCardOnFieldMenu(Card card)
     {
         DisableRightClickMenus();
@@ -272,7 +280,8 @@ public class UIManager : MonoBehaviour
         cardOnFieldRightClickMenu.gameObject.SetActive(true);
         cardOnFieldRightClickMenu.GetComponent<OnFieldCardRightClickController>().card = card;
         RectTransform menu = cardOnFieldRightClickMenu.GetComponent<RectTransform>();
-        cardOnFieldRightClickMenu.SetAsLastSibling();
+        cardOnFieldRightClickMenu.relatedCardButton.gameObject.SetActive(GameManager.Instance.nameToRelatedCards.ContainsKey(card.name) || card.twoSidedNames != null);
+        cardOnFieldRightClickMenu.transform.SetAsLastSibling();
         menu.position = Input.mousePosition + new Vector3(menu.sizeDelta.x/2,menu.sizeDelta.y/2 ,0);
     }
 }

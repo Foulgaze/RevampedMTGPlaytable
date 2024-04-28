@@ -121,7 +121,7 @@ public class NetworkCommandHandler
             }
             case (int) NetworkInstruction.copyCard:
             {
-                GameManager.Instance.CopyCard(msgUUID, instruction);
+                GameManager.Instance.ReceieveCopyCard(msgUUID, instruction);
                 break;
             }
             case (int) NetworkInstruction.deleteCard:
@@ -139,6 +139,11 @@ public class NetworkCommandHandler
                 GameManager.Instance.ReceieveChangePowerToughness(instruction);
                 break;
             }   
+            case (int) NetworkInstruction.createRelatedCard:
+            {
+                GameManager.Instance.ReceiveCreateReleatedCard(msgUUID, instruction);
+                break;
+            }
         }
     }
 }

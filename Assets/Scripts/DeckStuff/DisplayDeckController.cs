@@ -129,7 +129,7 @@ public class DisplayDeckController : MonoBehaviour, CardContainer
     public void RenderLibrary(List<Card> cards)
     {
         List<Card> cardsCopy = new List<Card>(cards);
-        cardsCopy = cardsCopy.OrderBy(x=>x.info.name).ToList();
+        cardsCopy = cardsCopy.OrderBy(x=>x.name).ToList();
         SetGridValues(cardsCopy.Count);
         for(int i = 0; i < cardsCopy.Count; ++i)
         {
