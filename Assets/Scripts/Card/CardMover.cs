@@ -58,7 +58,6 @@ public class CardMover : MonoBehaviour, IPointerDownHandler, IPointerEnterHandle
         }
         if(HelperFunctions.IsHoldingCTRL() && !handManager.CardInHand(card))
         {
-            // card.TapUntap();
             GameManager.Instance.SendTapUntap(card);
             return;
         }

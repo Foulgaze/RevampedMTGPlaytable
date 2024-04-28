@@ -1,19 +1,18 @@
-using System.Collections;
+using Newtonsoft.Json;
 using System.Collections.Generic;
 using System;
 using System.IO;
 using CsvHelper;
 using System.Globalization;
 using CsvHelper.Configuration.Attributes;
-using System.Diagnostics;
 using UnityEngine;
-using Image = UnityEngine.UI.Image;
+using System.Linq;
 public class CardInfo
 {
     [Name("name")]
     public string name {get;set;}
     [Name("faceName")]
-    public string faceName {get;set;}
+    public string faceName {get;set;} = "";
 
     [Name("setCode")]
     public string setCode {get;set;}
@@ -30,73 +29,24 @@ public class CardInfo
     [Name("text")]
     public string text {get;set;}
 
-    [Name("types")]
-    public string types {get;set;}
+    // [Name("types")]
+    // public string types {get;set;}
     [Name("type")]
     public string type {get;set;}
-    
+    [Name("layout")]
+    public string layout {get;set;}
+    [Name("uuid")]
+public string uuid {get;set;}
+}
 
-
-    [Ignore]
-    private Sprite cardSprite;
-    [Ignore]
-    public Queue<Image> missingSprites = new Queue<Image>();
-
-    
-
-    [Ignore]
-
-    public Sprite CardSprite
-    {
-        get 
-        { 
-            return cardSprite; 
-        }
-        set
-        {
-            cardSprite = value;
-            TextureItems();
-        }
-    }
-
-
-    public Sprite GetCardSprite(Image i)
-    {
-        if(cardSprite != null)
-        {
-            return cardSprite;
-        }
-        AddToSpriteQueue(i);
-        return null;
-    }
-
-    void AddToSpriteQueue(Image image)
-    {
-        missingSprites.Enqueue(image);
-        TextureItems();
-    }
-
-    public void TextureItems() 
-    {
-        if(cardSprite == null)
-        {
-            return;
-        }
-        while(missingSprites.Count != 0)
-        {
-            Image missingSprite = missingSprites.Dequeue();
-            if(missingSprite == null)
-            {
-                continue;
-            }
-            missingSprite.sprite = cardSprite;
-        }
-    }
-
+public class TokenInfo : CardInfo
+{
+    [Name("relatedCards")]
+    public string relatedCards {get;set;}
 }
 public class FileLoader
 {
-	public static void LoadCSV(Dictionary<string,CardInfo> nameToCardInfo, string filePath)
+	public static void LoadAllCardsCSV(Dictionary<string,CardInfo> nameToCardInfo, string filePath)
 	{
 
         using (var reader = new StreamReader(filePath))
@@ -112,6 +62,52 @@ public class FileLoader
             }
         }
 	}
+
+    public static void LoadTokenCSV(Dictionary<string, HashSet<string>> nameToRelatedCards,Dictionary<string, TokenInfo> nameToToken, string filePath)
+    {
+        using (var reader = new StreamReader(filePath))
+        using (var csv = new CsvReader(reader, CultureInfo.InvariantCulture))
+        {
+            csv.Read();
+            csv.ReadHeader();
+            while (csv.Read())
+            {
+                var token = csv.GetRecord<TokenInfo>();
+                if(token.relatedCards.Count() == 0)
+                {
+                    continue;
+                }
+                Dictionary<string, List<string>> relatedCards;
+                // BLEH Way of doing it, im aware!
+                try
+                {
+                    relatedCards = JsonConvert.DeserializeObject<Dictionary<string,List<string>>>(token.relatedCards);
+                }
+                catch
+                {
+                    try
+                    {
+                        relatedCards = JsonConvert.DeserializeObject<Dictionary<string,List<string>>>(token.relatedCards.Replace("\\\\", "\\"));
+                    }
+                    catch
+                    {
+                        Debug.LogError($"Skipped - {token.relatedCards}");
+                        continue;
+                    }
+                }
+
+                foreach(string relatedCard in relatedCards["reverseRelated"])
+                {
+                    if(!nameToRelatedCards.ContainsKey(relatedCard))
+                    {
+                        nameToRelatedCards[relatedCard] = new HashSet<string>();
+                    }
+                    nameToRelatedCards[relatedCard].Add(token.name);
+                }
+                nameToToken[token.name] = token;
+            }
+        }
+    }
 
     public static int ParseCardList(string input,Dictionary<string,CardInfo> cards, Dictionary<string, int> nameToCount, List<string> missedCards)
     {

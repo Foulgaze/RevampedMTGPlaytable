@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using System.Linq;
 using System.Security.Cryptography;
 using UnityEngine;
@@ -5,6 +6,8 @@ using Image = UnityEngine.UI.Image;
 public class Card
 {
 	public int id {get;}
+
+	static List<string> typesThatRelateCards = new List<string>(){"meld", "transform", "modal_dfc"};
 	GameManager gameManager;
 
 	public Sprite sprite {get;}
@@ -14,10 +17,13 @@ public class Card
 
 	public int power;
 	public int toughness;
+	public string name;
 
 	public bool interactable = true;
 	public bool tapped = false;
 	public bool ethereal = false;
+
+	public string[]? twoSidedNames {get;set;}  = null;
 
 	public Card(int id,CardInfo info, GameManager gameManager)
 	{
@@ -25,23 +31,59 @@ public class Card
 		this.info = info;
 		this.gameManager = gameManager;
 		UpdatePowerToughness();
+		HandleTwoSidedCard();
+		SetName();
+	}
+	void SetName()
+	{
+		this.name = info.faceName == "" ? info.name : info.faceName;
+	}
+
+	void HandleTwoSidedCard()
+	{
+		if(!Card.typesThatRelateCards.Contains(info.layout))
+		{
+			return;
+		}
+		string[] cardNames = this.info.name.Split("//");
+		if(cardNames.Count() != 2)
+		{
+			return;
+		}
+		cardNames[0] = cardNames[0].Trim();
+		cardNames[1] = cardNames[1].Trim();
+		gameManager.twoSidedCards.Add(cardNames[1]);
+		twoSidedNames = cardNames;
+	}
+
+	public bool IsTwoSided()
+	{
+		return twoSidedNames != null;
 	}
 
 	public Card(Card card, int id,CardInfo info, GameManager gameManager)
 	{
-		// Needs to be refactored
+		// Needs to be refactored, essentially is just calling original constructor
 		this.id = id;
 		this.info = info;
 		this.gameManager = gameManager;
+		HandleTwoSidedCard();
+		SetName();
 
 		this.power = card.power;
 		this.toughness = card.toughness;
-		this.ethereal = true;
 		this.tapped = card.tapped;
+		
+		SetupEtherealCard();
 		bool ptEnabled = card.GetCardOnField().GetComponent<CardOnFieldComponents>().cardPowerToughness.gameObject.activeInHierarchy;
-		GetCardOnField();
 		DisplayPowerToughness(ptEnabled);
 		UpdateTapUntap();
+	}
+
+	 public void SetupEtherealCard()
+	{
+		this.ethereal = true;
+		GetCardOnField();
 		RectTransform inHand = GetInHandRect();
 		DisableRect();
 		inHand.SetParent(gameManager.handManager._handParent);
@@ -79,6 +121,7 @@ public class Card
 		{
 			components.SetPowerToughnessState(true);
 		}
+		Debug.Log("Setting PT - {power}/{toughness}");
 		components.cardPowerToughness.text = $"{power}/{toughness}";
 	}
 
@@ -109,7 +152,7 @@ public class Card
 		}
 		newCard = GameObject.Instantiate(gameManager.customCardInHandPrefab);
 		inHandCardRect = newCard.GetComponent<RectTransform>();
-		SetCardValues(info,newCard.GetComponent<CardComponents>());
+		SetCardValues(newCard.GetComponent<CardComponents>());
         newCard.GetComponent<CardMover>().card = this;
         return inHandCardRect;
 	}
@@ -212,7 +255,7 @@ public class Card
 
 	void SetupOnFieldCard(CardOnFieldComponents components )
 	{
-		components.cardName.text = info.name;
+		components.cardName.text = name;
 		if(info.power.Length == 0)
 		{
 			components.SetPowerToughnessState(false);
@@ -223,10 +266,10 @@ public class Card
 		}
 	}
 
-	void SetCardValues(CardInfo info, CardComponents components)
+	void SetCardValues(CardComponents components)
     {
         components.cardDescription.text = info.text;
-        components.cardName.text = info.name;
+        components.cardName.text = name;
         components.cardType.text = info.type;
         components.manaCost.text = info.manaCost;
     }

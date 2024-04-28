@@ -17,17 +17,18 @@ public class TextureLoader : MonoBehaviour
     
     public bool TextureImage(Card cardToBeTextured)
     {
-        if(GameManager.Instance.nameToSprite.ContainsKey(cardToBeTextured.info.name))
+        Debug.Log($"Texturing - {cardToBeTextured.name} - {cardToBeTextured.info.faceName}");
+        if(GameManager.Instance.nameToSprite.ContainsKey(cardToBeTextured.info.uuid))
         {
-            cardToBeTextured.SetSprite(GameManager.Instance.nameToSprite[cardToBeTextured.info.name]);
+            cardToBeTextured.SetSprite(GameManager.Instance.nameToSprite[cardToBeTextured.info.uuid]);
             return true;
         }
 
-        string filepath = $"Assets/Resources/Textures/{cardToBeTextured.info.setCode}{cardToBeTextured.info.cardNumber}.jpg";
+        string filepath = $"Assets/Resources/Textures/{cardToBeTextured.info.uuid}.jpg";
         if (File.Exists(filepath))
         {
-            GameManager.Instance.nameToSprite[cardToBeTextured.info.name] = LoadSpriteFromFile(filepath);
-            cardToBeTextured.SetSprite(GameManager.Instance.nameToSprite[cardToBeTextured.info.name]);
+            GameManager.Instance.nameToSprite[cardToBeTextured.info.uuid] = LoadSpriteFromFile(filepath);
+            cardToBeTextured.SetSprite(GameManager.Instance.nameToSprite[cardToBeTextured.info.uuid]);
             return true;
         }
 
@@ -35,7 +36,7 @@ public class TextureLoader : MonoBehaviour
         for(int i = 0; i < cardsToBeLoaded.Count; ++i)
         {
             CardTexture cardToTexture = cardsToBeLoaded.ElementAt(i);
-            if(cardToTexture.cardInfo == cardToBeTextured.info)
+            if(cardToTexture.card == cardToBeTextured)
             {
                 cardToTexture.cardsToBeTextured.Enqueue(cardToBeTextured);
                 addedCard = true;
@@ -57,18 +58,22 @@ public class TextureLoader : MonoBehaviour
         return sprite;
     }
     // TODO make multiple sources that images can be gathered from. 
-    public IEnumerator GetSprite(string setCode, string cardNo, string name, Queue<Card> toBeTextured)
+    public IEnumerator GetSprite(Card card, Queue<Card> toBeTextured)
     {
-        string filepath = $"Assets/Resources/Textures/{setCode}{cardNo}.jpg";
-        // if (File.Exists(filepath))
-        // {
-        //     GameManager.Instance.nameToSprite[name] = LoadSpriteFromFile(filepath);
-        //     TextureCards(toBeTextured);
-        //     yield break;
-        // }
+        string name = card.info.faceName == "" ? card.info.name : card.info.faceName; 
+        Debug.Log($"Loading {name}");
+        string filepath = $"Assets/Resources/Textures/{card.info.uuid}.jpg";
+        if (File.Exists(filepath))
+        {
+            GameManager.Instance.nameToSprite[card.info.uuid] = LoadSpriteFromFile(filepath);
+            TextureCards(toBeTextured);
+            yield break;
+        }
 
-        string url = $"https://api.scryfall.com/cards/{setCode.ToLower()}/{cardNo}?format=image&version=normal&face=front";
-        string backupUrl = $"https://api.scryfall.com/cards/named?exact={HttpUtility.UrlEncode(name)}&format=image";
+        string face = GameManager.Instance.twoSidedCards.Contains(name) && card.info.layout != "meld" ? "back" : "front";
+        string url = $"https://api.scryfall.com/cards/{card.info.setCode.ToLower()}/{card.info.cardNumber}?format=image&version=normal&face={face}";
+        string backupUrl = $"https://api.scryfall.com/cards/named?exact={HttpUtility.UrlEncode(name)}&format=image&face={face}";
+        
         
 
         UnityWebRequest textureRequest = UnityWebRequestTexture.GetTexture(url);
@@ -90,7 +95,7 @@ public class TextureLoader : MonoBehaviour
         File.WriteAllBytes(filepath, pngBytes);
 
         Sprite sprite = Sprite.Create(myTexture, new Rect(0, 0, myTexture.width, myTexture.height), Vector2.one * 0.5f);
-        GameManager.Instance.nameToSprite[name] = sprite;
+        GameManager.Instance.nameToSprite[card.info.uuid] = sprite;
         TextureCards(toBeTextured);
     }
 
@@ -103,7 +108,7 @@ public class TextureLoader : MonoBehaviour
             {
                 continue;
             }
-            card.SetSprite(GameManager.Instance.nameToSprite[card.info.name]);
+            card.SetSprite(GameManager.Instance.nameToSprite[card.info.uuid]);
         }
     }
 
@@ -118,8 +123,8 @@ public class TextureLoader : MonoBehaviour
             if(cardsToBeLoaded.Count != 0)
             {
                 CardTexture cardText = cardsToBeLoaded.Dequeue();
-                CardInfo info = cardText.cardInfo;
-                StartCoroutine(GetSprite(info.setCode,info.cardNumber,info.name, cardText.cardsToBeTextured));
+                Card card = cardText.card;
+                StartCoroutine(GetSprite(card, cardText.cardsToBeTextured));
             }
         }
 

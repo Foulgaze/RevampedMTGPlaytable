@@ -29,7 +29,7 @@ Fix functions that don't follow this.
 */
 public enum NetworkInstruction
 {
-    playerConnection, readyUp, userDisconnect, setLobbySize, chatboxMessage, unReady, updateDecks, showLibrary, revealTopCard, millXCards, copyCard, deleteCard, tapUnap, ChangePowerToughness
+    playerConnection, readyUp, userDisconnect, setLobbySize, chatboxMessage, unReady, updateDecks, showLibrary, revealTopCard, millXCards, copyCard, deleteCard, tapUnap, ChangePowerToughness, createRelatedCard
 }
 
 public class GameManager : MonoBehaviour
@@ -49,6 +49,7 @@ public class GameManager : MonoBehaviour
     Dictionary<string, Dictionary<string,int>> uuidToDeckMap = new Dictionary<string, Dictionary<string,int>>();
     public Dictionary<string, Sprite> nameToSprite = new Dictionary<string, Sprite>();
 
+    public HashSet<string> twoSidedCards = new HashSet<string>();
     // CHILDREN
     public UIManager _uiManager;
     public WindowMoverController windowController;
@@ -69,7 +70,9 @@ public class GameManager : MonoBehaviour
     Transform _boardPrefab;
 
     public Dictionary<string, CardInfo> nameToCardInfo = new Dictionary<string, CardInfo>();
+    public Dictionary<string, TokenInfo> nameToToken = new Dictionary<string, TokenInfo>();
 
+    public Dictionary<string, HashSet<string>> nameToRelatedCards = new Dictionary<string, HashSet<string>>();
     // TO DO
     // LOAD VALUES FROM FILES
 
@@ -126,7 +129,8 @@ public class GameManager : MonoBehaviour
     void Start()
     {
         Debug.developerConsoleVisible = true;
-        FileLoader.LoadCSV(nameToCardInfo, "Assets/cards.csv");
+        FileLoader.LoadAllCardsCSV(nameToCardInfo, "Assets/cards.csv");
+        FileLoader.LoadTokenCSV(nameToRelatedCards,nameToToken, "Assets/tokens.csv");
         _uuid = System.Guid.NewGuid().ToString();
         if(singlePlayer)
         {
@@ -227,7 +231,7 @@ public class GameManager : MonoBehaviour
         idToCard[cardID].Destroy();
     }
 
-    public void CopyCard(string uuid, string strID)
+    public void ReceieveCopyCard(string uuid, string strID)
     {
         int id;
         if(!int.TryParse(strID, out id))
@@ -247,14 +251,20 @@ public class GameManager : MonoBehaviour
             return;
         }
         Card copiedCard = CardManager.CopyCard(idToCard[id]);
+        InsertCardNextToCard(uuid, copiedCard, id);
+    }
+
+    void InsertCardNextToCard(string uuid, Card card, int originalCardID)
+    {
         Player player = uuidToPlayer[uuid];
-        (CardOnFieldBoard? boardContainingCard, int position) = player.boardScript.FindBoardContainingCard(id);
+        (CardOnFieldBoard? boardContainingCard, int position) = player.boardScript.FindBoardContainingCard(originalCardID);
         if(boardContainingCard == null)
         {
-            Debug.LogError($"Cannot find board containing card - {copiedCard.id}");
+            Debug.LogError($"Cannot find board containing card - {card.id}");
+            card.Destroy();
             return;
         }
-        boardContainingCard.AddCardToContainer(copiedCard, position + 1);
+        boardContainingCard.AddCardToContainer(card, position + 1);
     }
 
 
@@ -361,7 +371,7 @@ public class GameManager : MonoBehaviour
         {
             return;
         }
-        _networkManager.SendMessage(NetworkInstruction.copyCard,controller.card.id.ToString() );
+        _networkManager.SendMessage(NetworkInstruction.copyCard,controller.card.id.ToString());
     }
 
     public void UnreadyUp(string uuid)
@@ -496,5 +506,42 @@ public class GameManager : MonoBehaviour
             card.toughness = newValue;
         }
         card.DisplayPowerToughness(true);
+    }
+
+    public void SendCreateRelatedCard(Card card, string relatedCardName)
+    {
+        _networkManager.SendMessage(NetworkInstruction.createRelatedCard, $"{card.id}|{relatedCardName}");
+    }
+
+    public void ReceiveCreateReleatedCard(string uuid, string instruction)
+    {
+        if (string.IsNullOrEmpty(instruction))
+        {
+            Debug.LogError("Received empty instruction");
+            return;
+        }
+
+        string[] parts = instruction.Split('|');
+
+        if (parts.Length != 2)
+        {
+            Debug.LogError("Invalid instruction format: " + instruction);
+            return;
+        }
+
+        if (!int.TryParse(parts[0], out int cardId))
+        {
+            Debug.LogError("Invalid card ID format: " + parts[0]);
+            return;
+        }
+
+        Card? relatedCard = CardManager.CreateRelatedCard(parts[1]);
+        if(relatedCard == null)
+        {
+            Debug.LogError($"Cannot find card {parts[1]}");
+            return;
+        }
+        InsertCardNextToCard(uuid, relatedCard, cardId);
+
     }
 }

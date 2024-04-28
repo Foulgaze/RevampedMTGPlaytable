@@ -4,5 +4,6 @@ using UnityEngine;
 
 public class OnFieldCardRightClickController : MonoBehaviour
 {
+    public Transform relatedCardButton;
     public Card card;
 }
