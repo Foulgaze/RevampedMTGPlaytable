@@ -67,15 +67,17 @@ public class Card
 		this.id = id;
 		this.info = info;
 		this.gameManager = gameManager;
+		HandleTwoSidedCard();
+		SetName();
 
 		this.power = card.power;
 		this.toughness = card.toughness;
-		
 		this.tapped = card.tapped;
+		
+		SetupEtherealCard();
 		bool ptEnabled = card.GetCardOnField().GetComponent<CardOnFieldComponents>().cardPowerToughness.gameObject.activeInHierarchy;
 		DisplayPowerToughness(ptEnabled);
 		UpdateTapUntap();
-		SetupEtherealCard();
 	}
 
 	 public void SetupEtherealCard()
@@ -119,6 +121,7 @@ public class Card
 		{
 			components.SetPowerToughnessState(true);
 		}
+		Debug.Log("Setting PT - {power}/{toughness}");
 		components.cardPowerToughness.text = $"{power}/{toughness}";
 	}
 

@@ -105,12 +105,6 @@ public class FileLoader
                     nameToRelatedCards[relatedCard].Add(token.name);
                 }
                 nameToToken[token.name] = token;
-                if(token.name == "Goat")
-                {
-                    Debug.Log("HERE");
-                }
-                
-                
             }
         }
     }
