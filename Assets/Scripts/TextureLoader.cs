@@ -17,7 +17,6 @@ public class TextureLoader : MonoBehaviour
     
     public bool TextureImage(Card cardToBeTextured)
     {
-        Debug.Log($"Texturing - {cardToBeTextured.name} - {cardToBeTextured.info.faceName}");
         if(GameManager.Instance.nameToSprite.ContainsKey(cardToBeTextured.info.uuid))
         {
             cardToBeTextured.SetSprite(GameManager.Instance.nameToSprite[cardToBeTextured.info.uuid]);
@@ -116,6 +115,7 @@ public class TextureLoader : MonoBehaviour
 
     void Update()
     {
+        return;
         timer += Time.deltaTime;
         if(timer > cooldownPeriod)
         {
