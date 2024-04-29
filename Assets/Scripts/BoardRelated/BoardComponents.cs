@@ -117,6 +117,8 @@ public class BoardComponents : MonoBehaviour
         SetBoardValue(mainField, id, 8);
     }
 
+    // TO DO 
+    // REPLACE Trasnform of the boards with the cardonfieldboard component instead. Transform can be accessed from there
     CardOnFieldBoard GetCardOnFieldBoard(Transform passedBoard)
     {
         return passedBoard.GetComponent<CardOnFieldBoard>();

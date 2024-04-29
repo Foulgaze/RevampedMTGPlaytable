@@ -284,4 +284,5 @@ public class UIManager : MonoBehaviour
         cardOnFieldRightClickMenu.transform.SetAsLastSibling();
         menu.position = Input.mousePosition + new Vector3(menu.sizeDelta.x/2,menu.sizeDelta.y/2 ,0);
     }
+
 }

@@ -3,6 +3,9 @@ using System.Linq;
 using System.Security.Cryptography;
 using UnityEngine;
 using Image = UnityEngine.UI.Image;
+// TO DO
+// Make it so a card knows where it is at all points.
+// This means when you add a card to a container it should note that so it can easily be removed later
 public class Card
 {
 	public int id {get;}
