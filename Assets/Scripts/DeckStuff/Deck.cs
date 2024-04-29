@@ -64,6 +64,7 @@ public class Deck : MonoBehaviour, CardContainer
     {
         card.ClearStats();
         int insertPosition = position == null ? cards.Count : (int)position;
+        insertPosition = Math.Clamp(insertPosition,0, cards.Count);
         cards.Insert(insertPosition, card);
         card.EnableRect();
         UpdatePhysicalDeck();

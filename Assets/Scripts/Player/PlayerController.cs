@@ -5,7 +5,16 @@ using System.Linq;
 using TMPro;
 using UnityEngine;
 using UnityEngine.UIElements;
+/*
+TO DO
+Currently much of the UI is always present and is not instantiated at run time.
+This is poor design as it causes much code reuse. What should really
+happen is that there should be some class that can create basic input box menus for things
+like draw x cards, mill x, exile x kind of deal. These menus should be instantiated then destroyed and not 
+always present. 
 
+
+*/
 public class PlayerController : MonoBehaviour
 {
     // Start is called before the first frame update
@@ -152,6 +161,67 @@ public class PlayerController : MonoBehaviour
             resultDeck.AddCard(drawnCard);
         }
         GameManager.Instance.SendUpdatedDecks();
+    }
+
+    public void MoveCardXFromTopOfDeck(MoveCardToController controller)
+    {
+        Player clientPlayer = GameManager.Instance.clientPlayer;
+        int insertPosition;
+        if(!int.TryParse(controller.input.text, out insertPosition))
+        {
+            Debug.LogError($"Unable to parse value - {controller.input.text}");
+            return;
+        }
+        insertPosition = clientPlayer.library.cards.Count - insertPosition;
+        MoveCardToDeck(GameManager.Instance.clientPlayer.library,controller.card, insertPosition);
+    }
+    public void MoveCardToTopOfDeck(MoveCardToController controller)
+    {
+        MoveCardToDeck(GameManager.Instance.clientPlayer.library,controller.card, null);
+    }
+
+    public void MoveCardToBottomOfDeck(MoveCardToController controller)
+    {
+        MoveCardToDeck(GameManager.Instance.clientPlayer.library,controller.card, 0);
+    }
+    
+    public void MoveCardToExile(MoveCardToController controller)
+    {
+        MoveCardToDeck(GameManager.Instance.clientPlayer.exile, controller.card, null);
+    }
+    public void MoveCardToGraveyard(MoveCardToController controller)
+    {
+        MoveCardToDeck(GameManager.Instance.clientPlayer.graveyard, controller.card, null);
+    }
+    public void MoveCardToDeck(Deck deck,Card card, int? insertPosition)
+    {
+        if(card == null)
+        {
+            Debug.LogError("Card is null");
+            return;
+        }
+        if(!RemoveCardFromCurrentPosition(card))
+        {
+            Debug.LogError("Unable to find card to remove");
+            return;
+        }
+        deck.AddCardToContainer(card, insertPosition);
+        GameManager.Instance.SendUpdatedDecks();
+
+    }
+
+    
+
+    public bool RemoveCardFromCurrentPosition(Card card)
+    {
+        (CardOnFieldBoard? board, _) = GameManager.Instance.clientPlayer.boardScript.FindBoardContainingCard(card.id);
+        if(board == null)
+        {
+            return false;
+        }
+        board.RemoveCardFromContainer(card);
+        return true;
+
     }
 
     public void CloneCard(OnFieldCardRightClickController controller)

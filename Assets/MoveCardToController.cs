@@ -1,0 +1,18 @@
+using System.Collections;
+using System.Collections.Generic;
+using TMPro;
+using UnityEngine;
+
+public class MoveCardToController : MonoBehaviour
+{
+    public TMP_InputField input;
+
+    public Card card;
+    public void InitMenu(OnFieldCardRightClickController controller)
+    {
+        gameObject.SetActive(true);
+        input.text = "";
+        this.card = controller.card;
+    }
+    
+}

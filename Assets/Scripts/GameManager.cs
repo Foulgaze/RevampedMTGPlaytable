@@ -542,6 +542,6 @@ public class GameManager : MonoBehaviour
             return;
         }
         InsertCardNextToCard(uuid, relatedCard, cardId);
-
     }
+    
 }
