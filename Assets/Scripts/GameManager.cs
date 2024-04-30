@@ -27,6 +27,12 @@ The paradigm should be that nothing is ever done locally. Network calls should b
 and then when the call is received it is done locally. 
 Fix functions that don't follow this.
 */
+
+/*
+TODO
+The mapping for cards is currently name to cardinfo and tokenname to cardinfo. This needs to be changed
+to be uuid to cardinfo in both cases. 
+*/
 public enum NetworkInstruction
 {
     playerConnection, readyUp, userDisconnect, setLobbySize, chatboxMessage, unReady, updateDecks, showLibrary, revealTopCard, millXCards, copyCard, deleteCard, tapUnap, ChangePowerToughness, createRelatedCard
@@ -47,7 +53,7 @@ public class GameManager : MonoBehaviour
     int _PID;
     Dictionary<string, string> uuidToName = new Dictionary<string, string>();
     Dictionary<string, Dictionary<string,int>> uuidToDeckMap = new Dictionary<string, Dictionary<string,int>>();
-    public Dictionary<string, Sprite> nameToSprite = new Dictionary<string, Sprite>();
+    public Dictionary<string, Sprite> uuidToSprite = new Dictionary<string, Sprite>();
 
     public HashSet<string> twoSidedCards = new HashSet<string>();
     // CHILDREN
@@ -332,6 +338,7 @@ public class GameManager : MonoBehaviour
         Random.InitState(GetSeed());
         _gameStarted = true;
         _uiManager.SwitchToStartGame();
+        _uiManager.tokenCreatorController.LoadTokens(nameToToken);
         CreatePlayerBoards(_PID);
         SetupUserDecks();
 
@@ -508,9 +515,9 @@ public class GameManager : MonoBehaviour
         card.DisplayPowerToughness(true);
     }
 
-    public void SendCreateRelatedCard(Card card, string relatedCardName)
+    public void SendCreateRelatedCard(int id, string relatedCardName)
     {
-        _networkManager.SendMessage(NetworkInstruction.createRelatedCard, $"{card.id}|{relatedCardName}");
+        _networkManager.SendMessage(NetworkInstruction.createRelatedCard, $"{id}|{relatedCardName}");
     }
 
     public void ReceiveCreateReleatedCard(string uuid, string instruction)
@@ -539,6 +546,11 @@ public class GameManager : MonoBehaviour
         if(relatedCard == null)
         {
             Debug.LogError($"Cannot find card {parts[1]}");
+            return;
+        }
+        if(cardId < 0)
+        {
+            uuidToPlayer[uuid].boardScript.mainField.GetComponent<CardOnFieldBoard>().AddCardToContainer(relatedCard, null);
             return;
         }
         InsertCardNextToCard(uuid, relatedCard, cardId);
