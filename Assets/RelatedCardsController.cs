@@ -58,9 +58,8 @@ public class RelatedCardsController : MonoBehaviour
             Transform newButton = Instantiate(relatedCardButtonPrefab, relatedCardsHolder);
             newButton.GetChild(0).GetComponent<TextMeshProUGUI>().text = cardName;
             Button button = newButton.GetComponent<Button>();
-            button.onClick.AddListener(() => GameManager.Instance.SendCreateRelatedCard(card, cardName));
+            button.onClick.AddListener(() => GameManager.Instance.SendCreateRelatedCard(card.id, cardName));
             button.onClick.AddListener(() => GameManager.Instance._uiManager.Disable(transform));
-            button.onClick.AddListener(() => Debug.Log("SENDING"));
 
         }
     }

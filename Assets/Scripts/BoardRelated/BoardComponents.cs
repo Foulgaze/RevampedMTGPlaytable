@@ -3,7 +3,14 @@ using System.Collections.Generic;
 using UnityEngine;
 using System;
 using Unity.VisualScripting;
+/*
+TO DO
+change fields from transforms to cardonfieldholder scripts.  
 
+
+
+
+*/
 public enum Piletype {graveyard, library, exile, leftField, rightField, mainField}
 public class BoardComponents : MonoBehaviour
 {
@@ -25,8 +32,7 @@ public class BoardComponents : MonoBehaviour
     Transform leftField;
     [SerializeField]
     Transform rightField;
-    [SerializeField]
-    Transform mainField;
+    public Transform mainField;
     [SerializeField]
     Sprite cardBack;
 
@@ -119,7 +125,7 @@ public class BoardComponents : MonoBehaviour
 
     // TO DO 
     // REPLACE Trasnform of the boards with the cardonfieldboard component instead. Transform can be accessed from there
-    CardOnFieldBoard GetCardOnFieldBoard(Transform passedBoard)
+    public CardOnFieldBoard GetCardOnFieldBoard(Transform passedBoard)
     {
         return passedBoard.GetComponent<CardOnFieldBoard>();
     }

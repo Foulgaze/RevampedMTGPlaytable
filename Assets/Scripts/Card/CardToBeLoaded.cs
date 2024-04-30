@@ -4,12 +4,28 @@ using UnityEngine;
 using Image = UnityEngine.UI.Image;
 public class CardTexture
 {
-    public Queue<Card> cardsToBeTextured {get;} = new Queue<Card>();
-    public Card card {get;}
+    public Queue<ITextureable> cardsToBeTextured {get;} = new Queue<ITextureable>();
+    public CardInfo info {get;}
 
-    public CardTexture(Card card)
+    public CardTexture(CardInfo info)
     {
-        this.card = card;
-        cardsToBeTextured.Enqueue(card);
+        this.info = info;
+    }
+
+    public void Enqueue(ITextureable textureable)
+    {
+        cardsToBeTextured.Enqueue(textureable);
+    }
+
+    public ITextureable Dequeue()
+    {
+        return cardsToBeTextured.Dequeue();
     }
 }
+
+public interface ITextureable
+{
+    public void TextureSelf(CardInfo info);
+    public CardInfo GetInfo();
+}
+

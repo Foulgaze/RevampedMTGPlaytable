@@ -23,6 +23,7 @@ public class HandManager : MonoBehaviour, CardContainer
     [SerializeField]
     DeckDisplay deckDisplay;
 
+
     [SerializeField]
     RectTransform pileViewBox;
     Vector2 _cardDimensions;
@@ -31,6 +32,7 @@ public class HandManager : MonoBehaviour, CardContainer
     int _cardYPositionFraction = 3;
 
     public Card heldCard = null;   
+    public Card hoveredCard = null;
     public Vector2 offset;
 
     public Vector3 lastHitPosition;
@@ -135,6 +137,7 @@ public class HandManager : MonoBehaviour, CardContainer
             if(!released)
             {
                 GameManager.Instance.SendDestroyCard(heldCard.id);
+                hoveredCard = null;
             }
         }
         else if(inside)
@@ -265,6 +268,11 @@ public class HandManager : MonoBehaviour, CardContainer
     {
         return Input.GetMouseButtonDown(1) && !IsHoldingCard() && lastHoveredPile != null && lastHoveredPile.GetComponent<CardOnFieldBoard>() == null;
     }
+    
+    bool IsRightClickingNothing()
+    {
+        return Input.GetMouseButtonDown(1) && !IsHoldingCard() && (lastHoveredPile == null || (lastHoveredPile != null && lastHoveredPile.GetComponent<CardOnFieldBoard>() != null)) && hoveredCard == null;
+    }
 
 
     void Update()
@@ -290,7 +298,10 @@ public class HandManager : MonoBehaviour, CardContainer
             {
                 GameManager.Instance._uiManager.EnableLibraryRightClickMenu(lastHoveredPile.GetComponent<CardOnFieldContainer>().deck, GameManager.Instance._uiManager.libraryPileRightClickMenu);
             }
-            
+        }
+        if (IsRightClickingNothing())
+        {
+            GameManager.Instance._uiManager.EnableDefaultMenu();
         }
         CheckForPile();
         
@@ -345,7 +356,7 @@ public class HandManager : MonoBehaviour, CardContainer
         RaycastHit hit;
 
         if (Physics.Raycast(ray, out hit, Mathf.Infinity, layerMask))
-        {
+    {
             lastHitPosition = hit.point;
             Transform hitObject = hit.collider.transform;
             return hitObject;
@@ -355,10 +366,6 @@ public class HandManager : MonoBehaviour, CardContainer
         return null;
     }
 
-    void FixedUpdate()
-    {
-        
-    }
-
+  
 
 }

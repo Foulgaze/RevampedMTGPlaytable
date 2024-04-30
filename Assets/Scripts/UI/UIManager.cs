@@ -5,6 +5,7 @@ using System.Linq;
 using CsvHelper.Configuration.Attributes;
 using TMPro;
 using UnityEngine;
+using UnityEngine.UI;
 
 public class UIManager : MonoBehaviour
 {
@@ -44,24 +45,38 @@ public class UIManager : MonoBehaviour
     DisplayDeckController revealHolder;
     [SerializeField]
     OnFieldCardRightClickController cardOnFieldRightClickMenu;
+    public Transform defaultRightClickMenu;
 
     [SerializeField]
     RelatedCardsController relatedCardsController;
+
+    [SerializeField]
+    Image currentlyHoveredCard;
     bool skipDisablingMenus = false;
     public Transform unusedCardHolder;
     public DisplayDeckController libraryBoxController;
 
     public Deck currentSelectedDeck;
+    public TokenCreatorController tokenCreatorController;
+
+    [SerializeField]
+    Image hoveredCardImage;
+    HoveredCardController hoveredCardController;
 
 
     bool ready = false;
 
+    void Start()
+    {
+        hoveredCardController = new HoveredCardController(GameManager.Instance,hoveredCardImage);
+    }
 
     void DisableRightClickMenus()
     {
         libraryPileRightClickMenu.gameObject.SetActive(false);
         genericPileRightClickMenu.gameObject.SetActive(false);
         cardOnFieldRightClickMenu.gameObject.SetActive(false);
+        defaultRightClickMenu.gameObject.SetActive(false);
     }
     bool InSpecificMenu(Transform menu)
     {
@@ -72,7 +87,8 @@ public class UIManager : MonoBehaviour
         bool inLibraryPileMenu = InSpecificMenu(libraryPileRightClickMenu);
         bool inGenericPileMenu = InSpecificMenu(genericPileRightClickMenu);
         bool inCardOnFieldRightClickMenu = InSpecificMenu(cardOnFieldRightClickMenu.transform);
-        return inLibraryPileMenu || inGenericPileMenu || inCardOnFieldRightClickMenu;
+        bool inDefaultRightClickMenu = InSpecificMenu(defaultRightClickMenu.transform);
+        return inLibraryPileMenu || inGenericPileMenu || inCardOnFieldRightClickMenu || inDefaultRightClickMenu;
     }
     void Update()
     {
@@ -157,6 +173,16 @@ public class UIManager : MonoBehaviour
         menuTransform.gameObject.SetActive(true);
         RectTransform menu = menuTransform.GetComponent<RectTransform>();
         menuTransform.SetAsLastSibling();
+        menu.position = Input.mousePosition + new Vector3(menu.sizeDelta.x/2,menu.sizeDelta.y/2 ,0);
+    }
+
+    public void EnableDefaultMenu()
+    {
+        skipDisablingMenus= true;
+        DisableRightClickMenus();
+        defaultRightClickMenu.gameObject.SetActive(true);
+        RectTransform menu = defaultRightClickMenu.GetComponent<RectTransform>();
+        defaultRightClickMenu.SetAsLastSibling();
         menu.position = Input.mousePosition + new Vector3(menu.sizeDelta.x/2,menu.sizeDelta.y/2 ,0);
     }
 
@@ -283,6 +309,11 @@ public class UIManager : MonoBehaviour
         cardOnFieldRightClickMenu.relatedCardButton.gameObject.SetActive(GameManager.Instance.nameToRelatedCards.ContainsKey(card.name) || card.twoSidedNames != null);
         cardOnFieldRightClickMenu.transform.SetAsLastSibling();
         menu.position = Input.mousePosition + new Vector3(menu.sizeDelta.x/2,menu.sizeDelta.y/2 ,0);
+    }
+
+    public void SetHoveredCard(Card card)
+    {
+        hoveredCardController.ChangeHoveredCard(card);
     }
 
 }

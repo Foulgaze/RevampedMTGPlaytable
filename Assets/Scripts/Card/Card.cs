@@ -6,7 +6,7 @@ using Image = UnityEngine.UI.Image;
 // TO DO
 // Make it so a card knows where it is at all points.
 // This means when you add a card to a container it should note that so it can easily be removed later
-public class Card
+public class Card : ITextureable
 {
 	public int id {get;}
 
@@ -286,8 +286,9 @@ public class Card
 		}
 	}
 
-	public void SetSprite(Sprite newSprite)
-	{	
+	public void TextureSelf(CardInfo info)
+	{
+		Sprite newSprite = gameManager.uuidToSprite[info.uuid];
 		if(inHandCardRect != null)
 		{
 			Image cardImage = inHandCardRect.transform.GetComponent<Image>();
@@ -299,5 +300,10 @@ public class Card
 		{
 			cardOnField.GetComponent<CardOnFieldComponents>().cardArt.sprite = newSprite;
 		}
+	}
+
+	public CardInfo GetInfo()
+	{
+		return info;
 	}
 }
