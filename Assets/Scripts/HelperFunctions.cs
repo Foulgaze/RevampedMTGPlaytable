@@ -44,4 +44,18 @@ public class HelperFunctions : MonoBehaviour
     {
         return Input.GetKey(KeyCode.LeftControl) || Input.GetKey(KeyCode.RightControl);
     }
+
+    public static int ChangeIntputField(string text,bool? increase )
+    {
+        int result;
+        if(!int.TryParse(text, out result))
+        {
+            return 0;
+        }
+        if(increase == null)
+        {
+            return result;
+        }
+        return (bool) increase ? result + 1 : result - 1;
+    }
 }

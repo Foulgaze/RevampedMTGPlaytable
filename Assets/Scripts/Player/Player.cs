@@ -1,7 +1,8 @@
 using System.Collections.Generic;
 using Unity.VisualScripting;
 using UnityEngine;
-
+// TO DO
+// Change to use propertychangedeventhandlers
 public class Player
 {
     public string uuid {get;set;}
@@ -10,9 +11,12 @@ public class Player
     public Deck exile {get;set;}
     public Deck graveyard {get;set;}
     public int id {get; set;}
+    public int health {get;set;} = 40;
+    
 
 	public BoardComponents boardScript {get;set;}
 
+    public PlayerDescriptionController playerDescriptionController{get;set;}
     public HandManager hand;
 
     public Player(string uuid, string name, int id, BoardComponents components)

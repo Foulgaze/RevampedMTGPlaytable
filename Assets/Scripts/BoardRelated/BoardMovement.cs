@@ -7,9 +7,9 @@ using UnityEngine;
 public class BoardMovement : MonoBehaviour
 {
     int _currentIndex;
-    Transform[] _boards;
+    Player[] _players;
 
-    Transform _board;
+    Transform clientBoard;
 
     Vector3 _endPosition;
     float _sinTime;
@@ -18,24 +18,32 @@ public class BoardMovement : MonoBehaviour
     float _movementAllowance = 0.1f;
     bool _moving = false;
 
-    public void SetValues(Transform[] boards, Transform board)
+    public void SetValues(Player[] players, Player clientPlayer)
     {
-        _boards = boards;
-        _board = board;
+        _players = players;
+        clientBoard = clientPlayer.boardScript.transform;
     }
 
     void CheckForMovement()
     {
-        if((!Input.GetKeyDown(KeyCode.RightArrow) && !Input.GetKeyDown(KeyCode.LeftArrow)) || _moving || _boards.Count() > 1)
+        if(!GameManager.Instance._gameStarted || (!Input.GetKeyDown(KeyCode.RightArrow) && !Input.GetKeyDown(KeyCode.LeftArrow)) || _moving || _players.Count() < 1)
         {
             return;
         }
+        Debug.Log($"Moving");
         _moving = true;
         _sinTime = 0;
         _currentIndex = Input.GetKeyDown(KeyCode.RightArrow) ? _currentIndex + 1 : _currentIndex - 1;
-        _currentIndex = _currentIndex < 0 ? _boards.Length - 1 : _currentIndex;
-        _currentIndex %= _boards.Length;
-        _endPosition = new Vector3(_boards[_currentIndex].position.x, _board.position.y, _board.position.z);
+        _currentIndex = _currentIndex < 0 ? _players.Length - 1 : _currentIndex;
+        _currentIndex %= _players.Length;
+        Transform nextBoard = _players[_currentIndex].boardScript.transform;
+        _endPosition = new Vector3(nextBoard.position.x, clientBoard.position.y, clientBoard.position.z);
+        GameManager.Instance.playerDescriptionController.UpdateHealthBars();
+    }
+
+    public Player GetCurrentPlayer()
+    {
+        return _players[_currentIndex];
     }
 
     void UpdateMovement()
@@ -44,24 +52,25 @@ public class BoardMovement : MonoBehaviour
         {
             return;
         }
-        if(Mathf.Abs(_board.position.x - _endPosition.x) <= _movementAllowance)
+        if(Mathf.Abs(clientBoard.position.x - _endPosition.x) <= _movementAllowance)
         {
             _sinTime = 0;
             _moving = false;
-            _board.position = _endPosition;
+            clientBoard.position = _endPosition;
             return;
         }
         _sinTime += Time.deltaTime * _moveSpeed;
         _sinTime = Mathf.Clamp(_sinTime, 0, Mathf.PI);
         float t = evaluate(_sinTime);
-        _board.position = Vector3.Lerp(_board.position, _endPosition, t);
+        clientBoard.position = Vector3.Lerp(clientBoard.position, _endPosition, t);
     }
     
-    void Update()
+    void FixedUpdate()
     {
         if(_moving)
         {
             UpdateMovement();
+            return;
         }
         CheckForMovement();       
     }

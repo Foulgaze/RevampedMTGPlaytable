@@ -35,7 +35,7 @@ to be uuid to cardinfo in both cases.
 */
 public enum NetworkInstruction
 {
-    playerConnection, readyUp, userDisconnect, setLobbySize, chatboxMessage, unReady, updateDecks, showLibrary, revealTopCard, millXCards, copyCard, deleteCard, tapUnap, ChangePowerToughness, createRelatedCard
+    playerConnection, readyUp, userDisconnect, setLobbySize, chatboxMessage, unReady, updateDecks, showLibrary, revealTopCard, millXCards, copyCard, deleteCard, tapUnap, changePowerToughness, createRelatedCard, changeHealth
 }
 
 public class GameManager : MonoBehaviour
@@ -61,6 +61,7 @@ public class GameManager : MonoBehaviour
     public WindowMoverController windowController;
     public TextureLoader textureLoader;
     public HandManager handManager;
+    public PlayerDescriptionController playerDescriptionController;
 
     [SerializeReference]
     NetworkManager _networkManager;
@@ -70,8 +71,7 @@ public class GameManager : MonoBehaviour
     public Transform cardBack;
     public Transform pileTopper;
     public Material pilemat;
-    [SerializeField]
-    BoardMovement _boardMovement;
+    public BoardMovement boardMovement;
     [SerializeField]
     Transform _boardPrefab;
 
@@ -88,9 +88,9 @@ public class GameManager : MonoBehaviour
     bool requireCardCount = false;
 
     public int tapDegrees = 5;
-    float _cameraHeight = 15.5f;
-    float _cameraAngle = 70;
-    float _cameraZOffset = -2.5f;
+    float _cameraHeight = 14.5f;
+    float _cameraAngle = 80;
+    float _cameraZOffset = -5.1f;
 
     // Prefabs
     public Transform cardInHandPrefab;
@@ -104,6 +104,7 @@ public class GameManager : MonoBehaviour
     public string _username;
 
     public Player clientPlayer;
+    public Player enemyPlayer;
     public Dictionary<string, Player> uuidToPlayer = new Dictionary<string, Player>();
     public Dictionary<int, Card> idToCard = new Dictionary<int, Card>();
 
@@ -294,10 +295,11 @@ public class GameManager : MonoBehaviour
                 clientPlayer = player;
             }
         }
-        Transform[] boards = BoardGenerator.ArrangeBoards(uuidToPlayer, _uuid, new Vector2 (0,20));
-        _boardMovement.SetValues(boards,clientPlayer.boardScript.transform);
+        Player[] players = BoardGenerator.ArrangeBoards(uuidToPlayer, _uuid, new Vector2 (0,20));
+        boardMovement.SetValues(players,clientPlayer);
         BoardGenerator.PositionCamera(clientPlayer.boardScript.transform, Camera.main.transform, _cameraHeight, _cameraZOffset,_cameraAngle);
     }
+
 
 
     void SetupUserDecks()
@@ -341,6 +343,7 @@ public class GameManager : MonoBehaviour
         _uiManager.tokenCreatorController.LoadTokens(nameToToken);
         CreatePlayerBoards(_PID);
         SetupUserDecks();
+        playerDescriptionController.UpdateHealthBars();
 
     }
 
@@ -480,7 +483,7 @@ public class GameManager : MonoBehaviour
     public void SendChangePowerToughness(bool power, Card card, int value)
     {
         string valueChanged = power ? "power" : "toughness";
-        _networkManager.SendMessage(NetworkInstruction.ChangePowerToughness, $"{valueChanged}:{card.id}:{value}");
+        _networkManager.SendMessage(NetworkInstruction.changePowerToughness, $"{valueChanged}:{card.id}:{value}");
     }
 
     public void ReceieveChangePowerToughness(string changeInstruction)
@@ -554,6 +557,32 @@ public class GameManager : MonoBehaviour
             return;
         }
         InsertCardNextToCard(uuid, relatedCard, cardId);
+    }
+
+    public void SendChangeHealth()
+    {
+        _networkManager.SendMessage(NetworkInstruction.changeHealth, clientPlayer.health.ToString());
+    }
+
+    public void ReceiveChangeHealth(string uuid, string instruction)
+    {
+        if (!uuidToPlayer.ContainsKey(uuid))
+        {
+            Debug.LogError($"Player not found in dict {uuid}");
+            return;
+        }
+
+        Player player = uuidToPlayer[uuid];
+        
+        int newHealth;
+        if (!int.TryParse(instruction, out newHealth))
+        {
+            Debug.LogError($"Invalid health value in instruction: {instruction}");
+            return;
+        }
+
+        player.health = newHealth;
+        playerDescriptionController.UpdateHealthBars();
     }
     
 }
