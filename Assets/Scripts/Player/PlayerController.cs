@@ -227,8 +227,9 @@ public class PlayerController : MonoBehaviour
     public void CloneCard(OnFieldCardRightClickController controller)
     {
         Card card = controller.card;
-
     }
+
+ 
 
     // Update is called once per frame
     void Update()
@@ -249,6 +250,5 @@ public class PlayerController : MonoBehaviour
         {
             ShuffleDeck();
         }
-        
     }
 }

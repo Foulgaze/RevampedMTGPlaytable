@@ -20,18 +20,18 @@ public class ChangePowerToughnessController : MonoBehaviour
     }
     public void IncreasePowerToughness(TMP_InputField input)
     {
-        int newValue = ChangePowerToughness(input.text, true);
+        int newValue = HelperFunctions.ChangeIntputField(input.text, true);
         SetNewValue(input, newValue);
     }
     public void DecreasePowerToughness(TMP_InputField input)
     {
-        int newValue = ChangePowerToughness(input.text, false);
+        int newValue = HelperFunctions.ChangeIntputField(input.text, false);
         SetNewValue(input, newValue);
     }
 
     public void UpdatePowerToughness(TMP_InputField input)
     {
-        int newValue = ChangePowerToughness(input.text, null);
+        int newValue = HelperFunctions.ChangeIntputField(input.text, null);
         SetNewValue(input, newValue);
     }
 
@@ -50,17 +50,5 @@ public class ChangePowerToughnessController : MonoBehaviour
         GameManager.Instance.SendChangePowerToughness(changingPower, card, newValue);
         // card.DisplayPowerToughness(true);
     }
-    int ChangePowerToughness(string text,bool? increase )
-    {
-        int result;
-        if(!int.TryParse(text, out result))
-        {
-            return 0;
-        }
-        if(increase == null)
-        {
-            return result;
-        }
-        return (bool) increase ? result + 1 : result - 1;
-    }
+
 }

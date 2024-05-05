@@ -63,6 +63,11 @@ public class UIManager : MonoBehaviour
     Image hoveredCardImage;
     HoveredCardController hoveredCardController;
 
+    [SerializeField]
+    Transform playerBar;
+    [SerializeField]
+    Transform enemyBar;
+
 
     bool ready = false;
 
@@ -126,6 +131,8 @@ public class UIManager : MonoBehaviour
     public void SwitchToStartGame()
     {
         deckLoadMenu.SetActive(false);
+        playerBar.gameObject.SetActive(true);
+        enemyBar.gameObject.SetActive(true);
     }
 
     public void DisplayErrorMessage(string newMessage, int timer)

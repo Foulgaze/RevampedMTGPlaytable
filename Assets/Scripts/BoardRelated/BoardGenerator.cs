@@ -5,7 +5,7 @@ using System.Linq;
 using UnityEngine;
 public class BoardGenerator
 {
-    public static Transform[] ArrangeBoards(Dictionary<string, Player> idToPlayer, string targetID, Vector2 padding) // X is  distance from player to main board. Y is distance inbetween boards
+    public static Player[] ArrangeBoards(Dictionary<string, Player> idToPlayer, string targetID, Vector2 padding) // X is  distance from player to main board. Y is distance inbetween boards
     {
         int opponentCount = idToPlayer.Count - 1;
         Transform mainBoard = idToPlayer[targetID].boardScript.transform;
@@ -14,7 +14,7 @@ public class BoardGenerator
         Vector3 extents = mainBoard.GetComponent<Renderer>().bounds.extents;
         string[] uuids = idToPlayer.Keys.ToArray<string>();
         Array.Sort(uuids);
-        Transform[] boards = new Transform[opponentCount];
+        Player[] players = new Player[opponentCount];
         int counter = 0;
         foreach(string uuid in uuids)
         {
@@ -22,15 +22,16 @@ public class BoardGenerator
             {
                 continue;
             }
-            boards[counter++] = idToPlayer[uuid].boardScript.transform;
+            players[counter++] = idToPlayer[uuid];
         }
         for(int opponentID = 0; opponentID < opponentCount; ++opponentID)
         {
-            boards[opponentID].position = new Vector3(mainBoard.position.x + opponentID * (extents.x*2 + padding.y), mainBoard.position.y, mainBoard.position.z + padding.x + extents.z*2);
-            boards[opponentID].Rotate(Vector3.up, 180f);
-            boards[opponentID].GetComponent<BoardComponents>().isEnemyBoard = true; 
+            Transform boardScript = players[opponentID].boardScript.transform;
+            boardScript.position = new Vector3(mainBoard.position.x + opponentID * (extents.x*2 + padding.y), mainBoard.position.y, mainBoard.position.z + padding.x + extents.z*2);
+            boardScript.Rotate(Vector3.up, 180f);
+            boardScript.GetComponent<BoardComponents>().isEnemyBoard = true; 
         }
-        return boards;
+        return players;
     }
 
     public static void PositionCamera(Transform board, Transform camera, float height,float zOffset,  float angle)

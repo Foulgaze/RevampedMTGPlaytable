@@ -134,7 +134,7 @@ public class NetworkCommandHandler
                 GameManager.Instance.ReceiveTapUnTap(instruction);
                 break;
             }   
-            case (int) NetworkInstruction.ChangePowerToughness:
+            case (int) NetworkInstruction.changePowerToughness:
             {
                 GameManager.Instance.ReceieveChangePowerToughness(instruction);
                 break;
@@ -142,6 +142,11 @@ public class NetworkCommandHandler
             case (int) NetworkInstruction.createRelatedCard:
             {
                 GameManager.Instance.ReceiveCreateReleatedCard(msgUUID, instruction);
+                break;
+            }
+            case (int) NetworkInstruction.changeHealth:
+            {
+                GameManager.Instance.ReceiveChangeHealth(msgUUID, instruction);
                 break;
             }
         }
