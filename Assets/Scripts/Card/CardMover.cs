@@ -17,12 +17,8 @@ public class CardMover : MonoBehaviour, IPointerDownHandler, IPointerEnterHandle
     public void OnPointerEnter(PointerEventData eventData)
     {
         handManager.hoveredCard = card;
-        if(handManager.IsHoldingCard() || !GameManager.Instance.gameInteractable)
-        {
-            return;
-        }
         GameManager.Instance._uiManager.SetHoveredCard(card);
-        if(!handManager.CardInHand(card))
+        if(!handManager.CardInHand(card) || !card.interactable || handManager.IsHoldingCard() || !GameManager.Instance.gameInteractable)
         {
             return;
         }
@@ -42,7 +38,7 @@ public class CardMover : MonoBehaviour, IPointerDownHandler, IPointerEnterHandle
         {
             handManager.hoveredCard = null;
         }
-        if(handManager.IsHoldingCard() || !handManager.CardInHand(card) || !GameManager.Instance.gameInteractable)
+        if(handManager.IsHoldingCard() || !handManager.CardInHand(card) || !GameManager.Instance.gameInteractable ||  !card.interactable)
         {
             return;
         }

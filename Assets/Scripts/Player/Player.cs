@@ -19,25 +19,25 @@ public class Player
     public PlayerDescriptionController playerDescriptionController{get;set;}
     public HandManager hand;
 
-    public Player(string uuid, string name, int id, BoardComponents components)
+    public Player(string uuid, string name, int id, BoardComponents components, bool isClientPlayer)
     {
         this.uuid = uuid;
         this.name = name;
         this.id = id;
 		this.boardScript = components;
         components.SetupDecks();
-        SetupPiles();
+        SetupPiles(isClientPlayer);
     }
 
-    void SetupPiles()
+    void SetupPiles(bool isClientPlayer)
     {
         this.library = boardScript.library;
-        this.library.LateConstructor(Piletype.library, id, $"{name}'s Library", false);
+        this.library.LateConstructor(Piletype.library, id, $"{name}'s Library", isClientPlayer,false);
         this.library.deckID = Piletype.library;
 		this.exile = boardScript.exile;
-        this.exile.LateConstructor(Piletype.exile, id, $"{name}'s exile");
+        this.exile.LateConstructor(Piletype.exile, id, $"{name}'s exile",isClientPlayer);
 		this.graveyard = boardScript.graveyard;
-        this.graveyard.LateConstructor(Piletype.graveyard, id, $"{name}'s graveyard");
+        this.graveyard.LateConstructor(Piletype.graveyard, id, $"{name}'s graveyard",isClientPlayer);
 
     }
 

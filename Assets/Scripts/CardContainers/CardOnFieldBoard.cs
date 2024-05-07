@@ -46,6 +46,7 @@ public class CardOnFieldBoard : MonoBehaviour, CardContainer, RaycastableHolder
         float cardWidth = transform.lossyScale.x / (currentCardCount + (currentCardCount - 1) * percentageOfCardAsSpacer);
         float totalWidth = (cardWidth * cards.Count) + (cardWidth * percentageOfCardAsSpacer * (cards.Count - 1));
         Vector3 iterPosition = transform.position + new Vector3(-totalWidth / 2 + cardWidth / 2, 0, 0);
+        bool isOwnerBoard = owner == GameManager.Instance.clientPlayer.id;
 
         foreach(Card card in cards)
         {
@@ -54,7 +55,7 @@ public class CardOnFieldBoard : MonoBehaviour, CardContainer, RaycastableHolder
                 Debug.LogError("Invalid card");
                 continue;
             }
-            Transform onFieldCard = card.GetCardOnField();
+            Transform onFieldCard = card.GetCardOnField(isOwnerBoard);
             if(onFieldCard == null)
             {
                 Debug.LogError("OnFieldCard Can't be loaded");

@@ -133,7 +133,6 @@ public class FileLoader
                     totalCount += count;
                     continue;
                 }
-                UnityEngine.Debug.Log(cardName);
             }
             missedCards.Add(line);
 

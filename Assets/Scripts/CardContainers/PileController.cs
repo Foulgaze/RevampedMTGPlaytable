@@ -20,7 +20,7 @@ public class PileController : MonoBehaviour
 
     }
 
-    public void SetDeck(List<Card> newCards, bool revealTop)
+    public void SetDeck(List<Card> newCards, bool revealTop, bool isClientDeck)
     {
         foreach(Transform physicalCard in _cards)
         {
@@ -38,9 +38,9 @@ public class PileController : MonoBehaviour
             _cards.Push(newCard);
         }
         
-        UpdateTopCard(newCards, revealTop);
+        UpdateTopCard(newCards, revealTop, isClientDeck);
     }
-    public void UpdateTopCard(List<Card> newCards, bool revealTop)
+    public void UpdateTopCard(List<Card> newCards, bool revealTop, bool isClientDeck)
     {
         if(_cards.Count == 0)
         {
@@ -58,7 +58,7 @@ public class PileController : MonoBehaviour
         }
         else
         {
-            cardTopper = card.GetInHandRect();
+            cardTopper = card.GetInHandRect(isClientDeck);
             card.EnableRect();
         }
         cardTopper.transform.SetParent(canvasObj);

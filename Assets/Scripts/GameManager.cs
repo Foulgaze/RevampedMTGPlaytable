@@ -287,7 +287,7 @@ public class GameManager : MonoBehaviour
         {
             Transform newBoard = GameObject.Instantiate(_boardPrefab);
             BoardComponents components = newBoard.GetComponent<BoardComponents>();
-            Player player = new Player(uuid,uuidToName[uuid], playerID++, components);
+            Player player = new Player(uuid,uuidToName[uuid], playerID++, components, this._uuid == uuid);
             components.SetBoardValues(player.id);
             uuidToPlayer[uuid] = player;
             if(uuid == _uuid)
