@@ -128,13 +128,7 @@ public class Card : ITextureable
 		components.cardPowerToughness.text = $"{power}/{toughness}";
 	}
 
-	public RectTransform GetInHandRect()
-	{
-		this.interactable = true;
-		return GenerateInHandRect();
-	}
-
-	public RectTransform GetInHandRect(bool interactable)
+	public RectTransform GetInHandRect(bool interactable = true)
 	{
 		this.interactable = interactable;
 		return GenerateInHandRect();
@@ -242,8 +236,12 @@ public class Card : ITextureable
 	}
 
 
-
-	public Transform GetCardOnField()
+	public Transform GetCardOnField(bool interactable = true)
+	{
+		this.interactable = interactable;
+		return GenerateCardOnField();
+	}
+	public Transform GenerateCardOnField()
 	{
 		if(cardOnField != null)
 		{

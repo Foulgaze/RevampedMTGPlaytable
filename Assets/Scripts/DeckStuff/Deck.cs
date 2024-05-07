@@ -10,8 +10,8 @@ public class Deck : MonoBehaviour, CardContainer
     public List<Card> cards = new List<Card>();
     public PileController physicalDeck {set;get;}
     public string name {get;set;}
-
     public int owner {get;set;}
+    public bool isClientDeck {get;set;}
     public bool _revealTopCard {get; set;} = true ;
 
     public Card? DrawCard()
@@ -47,7 +47,7 @@ public class Deck : MonoBehaviour, CardContainer
     
     public void UpdatePhysicalDeck()
     {
-        physicalDeck.SetDeck(cards, _revealTopCard);
+        physicalDeck.SetDeck(cards, _revealTopCard, isClientDeck);
         DisplayDeckController libraryController = GameManager.Instance._uiManager.libraryHolder.GetComponent<DisplayDeckController>();
         if(libraryController.gameObject.activeInHierarchy && libraryController.currentDeck == this)
         {
@@ -57,7 +57,7 @@ public class Deck : MonoBehaviour, CardContainer
 
     public void DeleteDeckOnField()
     {
-        physicalDeck.SetDeck(new List<Card>(), false);
+        physicalDeck.SetDeck(new List<Card>(), false, isClientDeck);
     }
 
     public void AddCardToContainer(Card card, int? position)
@@ -80,12 +80,13 @@ public class Deck : MonoBehaviour, CardContainer
         return new DeckDescriptor(cards.Count, topCard,(int) deckID, _revealTopCard, null);
     }
 
-    public void LateConstructor(Piletype type, int id, string name, bool revealTop = true)
+    public void LateConstructor(Piletype type, int id, string name, bool isClientDeck,bool revealTop = true)
     {
         this.deckID = type;
         this.owner = id;
         this.name = name;
         this._revealTopCard = revealTop;
+        this.isClientDeck = isClientDeck;
     }
 
     public bool MoveTopCardToBottom()
@@ -143,5 +144,3 @@ public class Deck : MonoBehaviour, CardContainer
         return;
     }
 }
-
-

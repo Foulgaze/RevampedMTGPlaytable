@@ -6834,7 +6834,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 8e14675ae0ceea74098680b9f590187e, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  _readyUpNeeded: 3
+  _readyUpNeeded: 2
   _uiManager: {fileID: 651060503}
   windowController: {fileID: 651060508}
   textureLoader: {fileID: 651060506}
