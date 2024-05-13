@@ -3,9 +3,14 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using TMPro;
+using Unity.VisualScripting;
 using UnityEngine;
 using UnityEngine.UI;
-public class DisplayDeckController : MonoBehaviour, CardContainer
+
+/*TO DO
+This should not be a card container.
+*/
+public class  DisplayContainerController : MonoBehaviour
 {
     [SerializeField]
     Transform cardIconPrefab;    
@@ -33,7 +38,7 @@ public class DisplayDeckController : MonoBehaviour, CardContainer
     public Vector2 cardDimensions;
 
     [HideInInspector]
-    public Deck currentDeck;
+    public CardContainer currentContainer;
     bool renderEntireLibrary = false;
     List<Card> cardsToRender;
     List<Transform> hiddenCards = new List<Transform>();
@@ -46,27 +51,23 @@ public class DisplayDeckController : MonoBehaviour, CardContainer
     }
 
 
-    public void LoadPile(Deck deck, List<Card> cardsToRender, bool interactable)
+    public void LoadPile(CardContainer container, List<Card> cardsToRender, bool interactable)
     {
-        if(deck == null)
-        {
-            Debug.LogError("Unable to load deck");
-        }
         gameObject.SetActive(true);
         this.interactable = interactable;
         renderEntireLibrary = cardsToRender == null;
         Cleanup();
         this.cardsToRender = cardsToRender;
-        this.boxName.text = deck.name;
-        currentDeck = deck;
-        boxName.text = GetName(currentDeck.deckID);
+        boxName.text = container.GetName();
+        currentContainer = container;
+        // boxName.text = GetName(currentContainer.deckID);
         if(renderEntireLibrary)
         {
-            RenderLibrary(deck.cards);
+            RenderContainer(container.GetCards());
         }
         else
         {
-            RenderTopXCards(deck.cards);
+            RenderTopXCards(container.GetCards());
         }
     }
 
@@ -102,6 +103,17 @@ public class DisplayDeckController : MonoBehaviour, CardContainer
             card.SetParent(unusedCardHolder);
         }
     }
+    public void UpdatePhysical()
+    {
+        if(currentContainer is Deck)
+        {
+            ((Deck)currentContainer).UpdateContainer();
+        }
+        if(currentContainer is HandManager)
+        {
+            ((HandManager)currentContainer).UpdateContainer();
+        }
+    }
 
     string GetName(Piletype deckid)
     {
@@ -119,14 +131,14 @@ public class DisplayDeckController : MonoBehaviour, CardContainer
         DestroyHiddenCards();
         if(renderEntireLibrary)
         {
-            RenderLibrary(currentDeck.cards);
+            RenderContainer(currentContainer.GetCards());
         }
         else
         {
-            RenderTopXCards(currentDeck.cards);
+            RenderTopXCards(currentContainer.GetCards());
         }
     }
-    public void RenderLibrary(List<Card> cards)
+    public void RenderContainer(List<Card> cards)
     {
         List<Card> cardsCopy = new List<Card>(cards);
         cardsCopy = cardsCopy.OrderBy(x=>x.name).ToList();
@@ -197,17 +209,12 @@ public class DisplayDeckController : MonoBehaviour, CardContainer
 
     public void AddCardToContainer(Card card, int? position)
     {
-        currentDeck.AddCardToContainer(card,position);
+        currentContainer.AddCardToContainer(card,position);
     }
 
     public void RemoveCardFromContainer(Card card)
     {
-        currentDeck.RemoveCardFromContainer(card);
-    }
-
-    public int GetOwner()
-    {
-        return currentDeck.GetOwner();
+        currentContainer.RemoveCardFromContainer(card);
     }
 
     public void ReleaseCardInBox(Card card)
@@ -217,7 +224,7 @@ public class DisplayDeckController : MonoBehaviour, CardContainer
             AddCardToContainer(card, null);
             return;
         }
-        AddCardToContainer(card, Math.Min(currentDeck.cards.Count(), cardHolder.childCount - FindClosestTransform()));
+        AddCardToContainer(card, Math.Min(currentContainer.GetCards().Count(), cardHolder.childCount - FindClosestTransform()));
     }
 
     int FindClosestTransform()

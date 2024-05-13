@@ -65,23 +65,22 @@ public class PlayerController : MonoBehaviour
         GameManager.Instance.clientPlayer.library.Shuffle();
     }
 
-    public void ViewLibrary()
+
+    public void ViewCardContainer()
     {
-        if(GameManager.Instance._uiManager.libraryHolder.gameObject.activeInHierarchy)
+        if(GameManager.Instance._uiManager.cardContainerDisplayHolder.gameObject.activeInHierarchy)
         {
-            HideLibrary(GameManager.Instance._uiManager.libraryHolder.GetComponent<DisplayDeckController>());
+            HideCardContainer(GameManager.Instance._uiManager.cardContainerDisplayHolder.GetComponent<DisplayContainerController>());
         }
-        Transform library = GameManager.Instance._uiManager.ShowLibrary();
-        library.position = new Vector3(Screen.width/2, Screen.height/2, 0);
-        DisplayDeckController controller = library.GetComponent<DisplayDeckController>();
-        controller.LoadPile(GameManager.Instance._uiManager.currentSelectedDeck, null, true);
+        Transform library = GameManager.Instance._uiManager.ShowCardContainer();
+        GameManager.Instance._uiManager.cardContainerController.LoadPile(GameManager.Instance._uiManager.currentSelectedDeck, null, true);
     }
 
     public void ViewTopXLibrary(LibraryInfoStorage storage)
     {
-        if(GameManager.Instance._uiManager.libraryHolder.gameObject.activeInHierarchy)
+        if(GameManager.Instance._uiManager.cardContainerDisplayHolder.gameObject.activeInHierarchy)
         {
-            HideLibrary(GameManager.Instance._uiManager.libraryHolder.GetComponent<DisplayDeckController>());
+            HideCardContainer(GameManager.Instance._uiManager.cardContainerDisplayHolder.GetComponent<DisplayContainerController>());
         }
         int cardCount;
         if(!Int32.TryParse(storage.input.text, out cardCount))
@@ -90,22 +89,22 @@ public class PlayerController : MonoBehaviour
         }
         List<Card> deckCards = storage.currentDeck.cards;
         cardCount = Math.Min(cardCount,deckCards.Count());
-        Transform library = GameManager.Instance._uiManager.ShowLibrary();
+        Transform library = GameManager.Instance._uiManager.ShowCardContainer();
         library.position = new Vector3(Screen.width/2, Screen.height/2, 0);
-        DisplayDeckController controller = library.GetComponent<DisplayDeckController>();
+        DisplayContainerController controller = library.GetComponent<DisplayContainerController>();
         List<Card> viewableCards = deckCards.GetRange(deckCards.Count - cardCount, cardCount);
         controller.LoadPile(storage.currentDeck, viewableCards, true);
     }
 
-    public void HideLibrary(DisplayDeckController controller)
+    public void HideCardContainer(DisplayContainerController controller)
     {
         controller.gameObject.SetActive(false);
-        controller.currentDeck.UpdatePhysicalDeck();
-        controller.currentDeck = null;
-        Deck currentlySelected = GameManager.Instance._uiManager.currentSelectedDeck;
-        if(currentlySelected != null)
+        controller.UpdatePhysical();
+        controller.currentContainer = null;
+        CardContainer currentlySelected = GameManager.Instance._uiManager.currentSelectedDeck;
+        if(currentlySelected is Deck)
         {
-            currentlySelected.UpdatePhysicalDeck();
+            ((Deck)currentlySelected).UpdateContainer();
         }
     }
 
@@ -200,11 +199,12 @@ public class PlayerController : MonoBehaviour
             Debug.LogError("Card is null");
             return;
         }
-        if(!RemoveCardFromCurrentPosition(card))
-        {
-            Debug.LogError("Unable to find card to remove");
-            return;
-        }
+        card.currentLocation.RemoveCardFromContainer(card);
+        // if(!RemoveCardFromCurrentPosition(card))
+        // {
+        //     Debug.LogError("Unable to find card to remove");
+        //     return;
+        // }
         deck.AddCardToContainer(card, insertPosition);
         GameManager.Instance.SendUpdatedDecks();
 

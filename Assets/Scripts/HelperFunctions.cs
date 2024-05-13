@@ -58,4 +58,14 @@ public class HelperFunctions : MonoBehaviour
         }
         return (bool) increase ? result + 1 : result - 1;
     }
+
+    public static List<int> GetCardInts(List<Card> cards)
+    {
+        List<int> cardInts = new List<int>();
+        foreach(Card card in cards)
+        {
+            cardInts.Add(card.id);
+        }
+        return cardInts;
+    }
 }

@@ -17,6 +17,7 @@ public class Card : ITextureable
 	public CardInfo info {get;}
 	RectTransform inHandCardRect = null;
 	Transform cardOnField = null;
+	public CardContainer currentLocation {get;set;}
 
 	public int power;
 	public int toughness;

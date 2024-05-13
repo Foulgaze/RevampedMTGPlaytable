@@ -8,7 +8,7 @@ public class DeckDisplay : MonoBehaviour
 {
     
 
-    public DisplayDeckController deckDisplayController;
+    public DisplayContainerController deckDisplayController;
 
     Vector2 offset;
     public void OnMouseEnter()

@@ -33,8 +33,10 @@ public class UIManager : MonoBehaviour
     Transform drawCardBox;
 
     [SerializeField]
-    public Transform libraryHolder;
+    public Transform cardContainerDisplayHolder;
 
+    [SerializeField]
+    Transform cardInHandMenu;
     [SerializeField]
     RevealPlayerManager selectPlayerMenu;
 
@@ -42,9 +44,11 @@ public class UIManager : MonoBehaviour
     Transform playerButton;
 
     [SerializeField]
-    DisplayDeckController revealHolder;
+    DisplayContainerController revealHolder;
     [SerializeField]
     OnFieldCardRightClickController cardOnFieldRightClickMenu;
+    [SerializeField]
+    CardInHandController cardInHandRightClickMenu;
     public Transform defaultRightClickMenu;
 
     [SerializeField]
@@ -54,7 +58,7 @@ public class UIManager : MonoBehaviour
     Image currentlyHoveredCard;
     bool skipDisablingMenus = false;
     public Transform unusedCardHolder;
-    public DisplayDeckController libraryBoxController;
+    public DisplayContainerController cardContainerController;
 
     public Deck currentSelectedDeck;
     public TokenCreatorController tokenCreatorController;
@@ -76,12 +80,17 @@ public class UIManager : MonoBehaviour
         hoveredCardController = new HoveredCardController(GameManager.Instance,hoveredCardImage);
     }
 
+    /* TODO
+    MAKE THIS ALL ARRAY STUFF
+    Put all menus in one array, clean up code!
+    */
     void DisableRightClickMenus()
     {
         libraryPileRightClickMenu.gameObject.SetActive(false);
         genericPileRightClickMenu.gameObject.SetActive(false);
         cardOnFieldRightClickMenu.gameObject.SetActive(false);
         defaultRightClickMenu.gameObject.SetActive(false);
+        cardInHandRightClickMenu.gameObject.SetActive(false);
     }
     bool InSpecificMenu(Transform menu)
     {
@@ -93,7 +102,9 @@ public class UIManager : MonoBehaviour
         bool inGenericPileMenu = InSpecificMenu(genericPileRightClickMenu);
         bool inCardOnFieldRightClickMenu = InSpecificMenu(cardOnFieldRightClickMenu.transform);
         bool inDefaultRightClickMenu = InSpecificMenu(defaultRightClickMenu.transform);
-        return inLibraryPileMenu || inGenericPileMenu || inCardOnFieldRightClickMenu || inDefaultRightClickMenu;
+        bool inInHandRightClickMenu = InSpecificMenu(cardInHandRightClickMenu.transform);
+
+        return inLibraryPileMenu || inGenericPileMenu || inCardOnFieldRightClickMenu || inDefaultRightClickMenu || inInHandRightClickMenu;
     }
     void Update()
     {
@@ -206,16 +217,17 @@ public class UIManager : MonoBehaviour
         libraryPileRightClickMenu.gameObject.SetActive(false);
     }
 
-    public Transform ShowLibrary()
+    public Transform ShowCardContainer()
     {
-        libraryHolder.gameObject.SetActive(true);
-        libraryHolder.SetAsLastSibling();
-        return libraryHolder;
+        cardContainerDisplayHolder.gameObject.SetActive(true);
+        cardContainerDisplayHolder.SetAsLastSibling();
+        cardContainerDisplayHolder.position = new Vector3(Screen.width/2, Screen.height/2, 0);
+        return cardContainerDisplayHolder;
     }
 
     public void HideLibrary()
     {
-        libraryHolder.gameObject.SetActive(false);
+        cardContainerDisplayHolder.gameObject.SetActive(false);
     }
     
 
@@ -301,6 +313,12 @@ public class UIManager : MonoBehaviour
         }
     }
 
+    public void RevealOpponentHand(HandDescriptor descriptor, string uuid)
+    {
+        List<Card> handCards = GameManager.Instance.IntToCards(descriptor.cards);
+        // revealHolder.LoadPile();
+    }
+
     public void EnableRelatedCardsMenu(OnFieldCardRightClickController menu)
     {
         relatedCardsController.InitMenu(menu);
@@ -322,5 +340,13 @@ public class UIManager : MonoBehaviour
     {
         hoveredCardController.ChangeHoveredCard(card);
     }
+    public void SpawnCardInHandMenu(Card card)
+    {
+        cardInHandRightClickMenu.InitMenu(card);
+        skipDisablingMenus = true;
+        RectTransform menu = cardInHandRightClickMenu.GetComponent<RectTransform>();
+        menu.position = Input.mousePosition + new Vector3(menu.sizeDelta.x/2,menu.sizeDelta.y/2 ,0);
 
+
+    }
 }

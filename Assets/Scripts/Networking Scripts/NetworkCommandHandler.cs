@@ -79,12 +79,12 @@ public class NetworkCommandHandler
                 // chatbox.AddMessage($"{gameManager.readyCount}/{gameManager.lobbySize} users ready.");
                 break;
             }
-            // case 2: // This is when a user disconnects to the server
-            // {
-            //     gameManager.RemoveUser(uuid);
-            //     chatbox.AddMessage($"{instruction} Has Disconnected!");
-            //     break;
-            // }
+            case 2: // This is when a user disconnects to the server
+            {
+                // gameManager.RemoveUser(uuid);
+                // chatbox.AddMessage($"{instruction} Has Disconnected!");
+                break;
+            }
             // case 3: // This is when a user sets lobbysize
             // {
             //     int previousLobbySize = gameManager.lobbySize;
@@ -104,7 +104,7 @@ public class NetworkCommandHandler
                 // chatbox.AddMessage($"{gameManager.readyCount}/{gameManager.lobbySize} users ready.");
                 break;
             }
-            case (int) NetworkInstruction.showLibrary: // When a user unreadies up
+            case (int) NetworkInstruction.showCardContainer: // When a user unreadies up
             {
                 if(msgUUID != GameManager.Instance._uuid)
                 {

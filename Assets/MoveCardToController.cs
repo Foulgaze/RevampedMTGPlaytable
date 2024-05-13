@@ -14,5 +14,12 @@ public class MoveCardToController : MonoBehaviour
         input.text = "";
         this.card = controller.card;
     }
+
+    public void InitMenu(CardInHandController controller)
+    {
+        gameObject.SetActive(true);
+        input.text = "";
+        this.card = controller.card;
+    }
     
 }

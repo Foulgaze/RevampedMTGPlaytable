@@ -73,7 +73,7 @@ public class HandManager : MonoBehaviour, CardContainer
 
     public void BeginCardDrag(Card card, Vector2 offset)
     {
-        if(CardInDeckDisplayView() && !GameManager.Instance._uiManager.libraryBoxController.interactable)
+        if(CardInDeckDisplayView() && !GameManager.Instance._uiManager.cardContainerController.interactable)
         {
             return;
         }
@@ -87,8 +87,8 @@ public class HandManager : MonoBehaviour, CardContainer
         } 
         else if(CardInDeckDisplayView())
         {
-            DisplayDeckController controller = GameManager.Instance._uiManager.libraryHolder.GetComponent<DisplayDeckController>();
-            controller.currentDeck.RemoveCardFromContainer(card);
+            DisplayContainerController controller = GameManager.Instance._uiManager.cardContainerDisplayHolder.GetComponent<DisplayContainerController>();
+            controller.currentContainer.RemoveCardFromContainer(card);
             card.GetInHandRect().SetParent(_handParent);
             inDeckDisplayView = true;
         }
@@ -143,7 +143,7 @@ public class HandManager : MonoBehaviour, CardContainer
         else if(inside)
         {
             ReleaseCardInBox(heldCard);
-            UpdateCardPositions();
+            UpdateContainer();
             heldCard.GetInHandRect().GetComponent<CardMover>().HoverCard();
         }
         else if(inDeckDisplayView)
@@ -153,7 +153,7 @@ public class HandManager : MonoBehaviour, CardContainer
         else if(lastHoveredPile == null)
         {
             AddCardToContainer(heldCard, null);
-            UpdateCardPositions();
+            UpdateContainer();
         }
         else
         {
@@ -173,10 +173,11 @@ public class HandManager : MonoBehaviour, CardContainer
     public void AddCardToContainer(Card card, int? position)
     {
         card.ClearStats();
+        card.currentLocation = this;
         int inputPosition = position == null ? cards.Count : (int)position;
         SetupRectForHand(card.GetInHandRect(), card);
         cards.Insert(inputPosition,card);
-        UpdateCardPositions();
+        UpdateContainer();
     }
 
     public void SetupRectForHand(RectTransform rt, Card card)
@@ -192,7 +193,7 @@ public class HandManager : MonoBehaviour, CardContainer
     public void RemoveCardFromContainer(Card card)
     {
         cards.Remove(card);
-        UpdateCardPositions();
+        UpdateContainer();
     }
 
     public int GetOwner()
@@ -203,7 +204,7 @@ public class HandManager : MonoBehaviour, CardContainer
 
 
 
-    public void UpdateCardPositions()
+    public void UpdateContainer()
     {
 
         float distanceBetweenCards = cards.Count <= _cardsPerHand ? _cardDimensions.x : (_boxExtents.x - _cardDimensions.x) / (cards.Count - 1);
@@ -310,7 +311,7 @@ public class HandManager : MonoBehaviour, CardContainer
     // TODO Should probably be its own file. Also very ugly must be a better way to write
     void CheckForPile()
     {
-        if(IsHoldingCard() && CardInDeckDisplayView() && GameManager.Instance._uiManager.libraryBoxController.interactable)
+        if(IsHoldingCard() && CardInDeckDisplayView() && GameManager.Instance._uiManager.cardContainerController.interactable)
         {
             if(lastHoveredPile != null)
             {
@@ -366,6 +367,14 @@ public class HandManager : MonoBehaviour, CardContainer
         return null;
     }
 
-  
+    public string GetName()
+    {
+        return "Hand";
+    }
+
+    public List<Card> GetCards()
+    {
+        return cards;
+    }
 
 }
