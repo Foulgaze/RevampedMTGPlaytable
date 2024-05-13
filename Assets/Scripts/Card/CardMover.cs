@@ -42,7 +42,7 @@ public class CardMover : MonoBehaviour, IPointerDownHandler, IPointerEnterHandle
         {
             return;
         }
-        handManager.UpdateCardPositions();
+        handManager.UpdateContainer();
         card.GetInHandRect().anchoredPosition = new Vector2(card.GetInHandRect().anchoredPosition.x,previousYValue);
     }
 
@@ -57,6 +57,10 @@ public class CardMover : MonoBehaviour, IPointerDownHandler, IPointerEnterHandle
             if(!handManager.CardInHand(card))
             {
                 GameManager.Instance._uiManager.SpawnCardOnFieldMenu(this.card);
+            }
+            else
+            {
+                GameManager.Instance._uiManager.SpawnCardInHandMenu(this.card);
             }
             return;
         }

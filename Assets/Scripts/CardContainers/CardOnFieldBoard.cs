@@ -29,43 +29,17 @@ public class CardOnFieldBoard : MonoBehaviour, CardContainer, RaycastableHolder
     }
     public void AddCardToContainer(Card card, int? position)
     {
+        card.currentLocation = this;
         if(position == null)
         {
             cards.Add(card);
-            UpdateCardPositions();
+            UpdateContainer();
             return;
         }
         int insertPosition = Mathf.Min(cards.Count, (int)position);
         cards.Insert(insertPosition, card);
-        UpdateCardPositions();
+        UpdateContainer();
     } 
-
-    void UpdateCardPositions()
-    {
-        int currentCardCount = Math.Max(cards.Count, cardCount);
-        float cardWidth = transform.lossyScale.x / (currentCardCount + (currentCardCount - 1) * percentageOfCardAsSpacer);
-        float totalWidth = (cardWidth * cards.Count) + (cardWidth * percentageOfCardAsSpacer * (cards.Count - 1));
-        Vector3 iterPosition = transform.position + new Vector3(-totalWidth / 2 + cardWidth / 2, 0, 0);
-        bool isOwnerBoard = owner == GameManager.Instance.clientPlayer.id;
-
-        foreach(Card card in cards)
-        {
-            if(card == null)
-            {
-                Debug.LogError("Invalid card");
-                continue;
-            }
-            Transform onFieldCard = card.GetCardOnField(isOwnerBoard);
-            if(onFieldCard == null)
-            {
-                Debug.LogError("OnFieldCard Can't be loaded");
-                continue;
-            }
-            onFieldCard.localScale = new Vector3(cardWidth, onFieldCard.localScale.y, cardWidth * 1/widthToHeightRatio);
-            onFieldCard.transform.position = iterPosition;
-            iterPosition += new Vector3(cardWidth + cardWidth * percentageOfCardAsSpacer, 0, 0);
-        }
-    }
 
     public DeckDescriptor GetDeckDescription(Piletype id)
     {
@@ -84,7 +58,7 @@ public class CardOnFieldBoard : MonoBehaviour, CardContainer, RaycastableHolder
     public void RemoveCardFromContainer(Card card)
     {
         cards.Remove(card);
-        UpdateCardPositions();
+        UpdateContainer();
     }
 
     public void EnterMouseOver()
@@ -113,7 +87,7 @@ public class CardOnFieldBoard : MonoBehaviour, CardContainer, RaycastableHolder
             card.DisableRect();
             cards.Add(card);
         }
-        UpdateCardPositions();
+        UpdateContainer();
     }
 
     void PrepareForHover()
@@ -181,5 +155,42 @@ public class CardOnFieldBoard : MonoBehaviour, CardContainer, RaycastableHolder
             AddCardToContainer(insertCard, insertPosition);
         }
         hoveredCard = null;
+    }
+
+    public string GetName()
+    {
+        return "board";
+    }
+
+    public List<Card> GetCards()
+    {
+        return cards;
+    }
+    
+    public void UpdateContainer()
+    {
+        int currentCardCount = Math.Max(cards.Count, cardCount);
+        float cardWidth = transform.lossyScale.x / (currentCardCount + (currentCardCount - 1) * percentageOfCardAsSpacer);
+        float totalWidth = (cardWidth * cards.Count) + (cardWidth * percentageOfCardAsSpacer * (cards.Count - 1));
+        Vector3 iterPosition = transform.position + new Vector3(-totalWidth / 2 + cardWidth / 2, 0, 0);
+        bool isOwnerBoard = owner == GameManager.Instance.clientPlayer.id;
+
+        foreach(Card card in cards)
+        {
+            if(card == null)
+            {
+                Debug.LogError("Invalid card");
+                continue;
+            }
+            Transform onFieldCard = card.GetCardOnField(isOwnerBoard);
+            if(onFieldCard == null)
+            {
+                Debug.LogError("OnFieldCard Can't be loaded");
+                continue;
+            }
+            onFieldCard.localScale = new Vector3(cardWidth, onFieldCard.localScale.y, cardWidth * 1/widthToHeightRatio);
+            onFieldCard.transform.position = iterPosition;
+            iterPosition += new Vector3(cardWidth + cardWidth * percentageOfCardAsSpacer, 0, 0);
+        }
     }
 }

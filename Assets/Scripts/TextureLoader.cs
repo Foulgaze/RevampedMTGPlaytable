@@ -15,7 +15,6 @@ public class TextureLoader : MonoBehaviour
     float cooldownPeriod = 0.1f; // 10 miliseconds
     public bool TextureImage(ITextureable toBeTextured)
     {
-        Debug.Log($"Starting Texture - {toBeTextured.GetInfo().name}");
         CardInfo info = toBeTextured.GetInfo();
         if(GameManager.Instance.uuidToSprite.ContainsKey(info.uuid))
         {

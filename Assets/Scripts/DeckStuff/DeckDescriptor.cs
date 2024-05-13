@@ -28,13 +28,21 @@ public class LibraryDescriptor
 	public Piletype deckID {get;}
 	public List<string> uuids {get;}
 	public int? cardShowCount {get;}
-
-
 	public LibraryDescriptor(List<int> cards, Piletype deckID, List<string> uuids, int? cardShowCount)
 	{
 		this.cards = cards;
 		this.deckID = deckID;
 		this.uuids = uuids;
 		this.cardShowCount = cardShowCount;
+	}
+}
+public class HandDescriptor
+{
+	public List<int> cards {get;}
+	public List<string> uuids {get;}
+	public HandDescriptor(List<int> cards, List<string> uuids)
+	{
+		this.cards = cards;
+		this.uuids = uuids;
 	}
 }

@@ -23,14 +23,14 @@ public class Deck : MonoBehaviour, CardContainer
         
         Card drawnCard = cards[cards.Count - 1];
         cards.RemoveAt(cards.Count - 1);
-        UpdatePhysicalDeck();
+        UpdateContainer();
         return drawnCard;
     }
 
     public void AddCard(Card card)
     {
         cards.Add(card);
-        UpdatePhysicalDeck();
+        UpdateContainer();
     }
     public void Shuffle()
     {
@@ -40,16 +40,26 @@ public class Deck : MonoBehaviour, CardContainer
     public bool RemoveCard(Card card) 
     {
         bool removed = cards.Remove(card);
-        UpdatePhysicalDeck();
+        UpdateContainer();
         return removed;
     }
 
+    public List<Card> GetCards()
+    {
+        return cards;
+    }
+
+    public string GetName()
+    {
+        return name;
+    }
+
     
-    public void UpdatePhysicalDeck()
+    public void UpdateContainer()
     {
         physicalDeck.SetDeck(cards, _revealTopCard, isClientDeck);
-        DisplayDeckController libraryController = GameManager.Instance._uiManager.libraryHolder.GetComponent<DisplayDeckController>();
-        if(libraryController.gameObject.activeInHierarchy && libraryController.currentDeck == this)
+        DisplayContainerController libraryController = GameManager.Instance._uiManager.cardContainerDisplayHolder.GetComponent<DisplayContainerController>();
+        if(libraryController.gameObject.activeInHierarchy && libraryController.currentContainer == this)
         {
             libraryController.UpdateHolder();
         }
@@ -63,11 +73,12 @@ public class Deck : MonoBehaviour, CardContainer
     public void AddCardToContainer(Card card, int? position)
     {
         card.ClearStats();
+        card.currentLocation = this;
         int insertPosition = position == null ? cards.Count : (int)position;
         insertPosition = Math.Clamp(insertPosition,0, cards.Count);
         cards.Insert(insertPosition, card);
         card.EnableRect();
-        UpdatePhysicalDeck();
+        UpdateContainer();
     }
 
     public DeckDescriptor GetDeckDescription()
@@ -98,14 +109,14 @@ public class Deck : MonoBehaviour, CardContainer
         Card topCard = cards[cards.Count-1];
         cards.Remove(topCard);
         cards.Insert(0,topCard);
-        UpdatePhysicalDeck();
+        UpdateContainer();
         return true;
     }
 
     public void RemoveCardFromContainer(Card card)
     {
         cards.Remove(card);
-        UpdatePhysicalDeck();
+        UpdateContainer();
     }
 
     public int GetOwner()
@@ -126,17 +137,7 @@ public class Deck : MonoBehaviour, CardContainer
             cards.Add(GameManager.Instance.idToCard[newDeck.topCard]);
         }
         _revealTopCard = newDeck.revealTop;
-        UpdatePhysicalDeck();
-    }
-
-    public List<int> GetCards()
-    {
-        List<int> cardInts = new List<int>();
-        foreach(Card card in cards)
-        {
-            cardInts.Add(card.id);
-        }
-        return cardInts;
+        UpdateContainer();
     }
 
     public void ReleaseCardInBox(Card card)

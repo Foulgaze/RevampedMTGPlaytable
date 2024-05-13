@@ -35,7 +35,9 @@ to be uuid to cardinfo in both cases.
 */
 public enum NetworkInstruction
 {
-    playerConnection, readyUp, userDisconnect, setLobbySize, chatboxMessage, unReady, updateDecks, showLibrary, revealTopCard, millXCards, copyCard, deleteCard, tapUnap, changePowerToughness, createRelatedCard, changeHealth
+    playerConnection, readyUp, userDisconnect, setLobbySize, chatboxMessage, unReady, 
+    updateDecks, showCardContainer, revealTopCard, millXCards, copyCard, deleteCard, tapUnap, 
+    changePowerToughness, createRelatedCard, changeHealth, revealHand
 }
 
 public class GameManager : MonoBehaviour
@@ -184,7 +186,7 @@ public class GameManager : MonoBehaviour
             return;
         }
         LibraryDescriptor descriptor;
-        List<int> allCards = controller.selectedDeck.GetCards();
+        List<int> allCards = HelperFunctions.GetCardInts(controller.selectedDeck.GetCards());
         int? cardShowCount = null;
         if(controller.input.gameObject.activeInHierarchy)
         {
@@ -195,7 +197,7 @@ public class GameManager : MonoBehaviour
             }
         }
         descriptor = new LibraryDescriptor(allCards, controller.selectedDeck.deckID,uuids, cardShowCount);
-        _networkManager.SendMessage(NetworkInstruction.showLibrary, JsonConvert.SerializeObject(descriptor));
+        _networkManager.SendMessage(NetworkInstruction.showCardContainer, JsonConvert.SerializeObject(descriptor));
     }
 
     public void RevealOpponentLibrary(string message, string uuid)
@@ -343,7 +345,10 @@ public class GameManager : MonoBehaviour
         _uiManager.tokenCreatorController.LoadTokens(nameToToken);
         CreatePlayerBoards(_PID);
         SetupUserDecks();
-        playerDescriptionController.UpdateHealthBars();
+        if(!singlePlayer)
+        {
+            playerDescriptionController.UpdateHealthBars();
+        }
 
     }
 
@@ -361,13 +366,13 @@ public class GameManager : MonoBehaviour
         _uiManager.SwitchToDeckLoad();
     }
 
-    public void ReadyUp(string uuid, string deck)
+    public void ReadyUp(string instructionUUID, string deck)
     {
 
         if(readyUpCount >= _readyUpNeeded)
             return;
     
-        uuidToDeckMap[uuid] = JsonConvert.DeserializeObject<Dictionary<string,int>>(deck);
+        uuidToDeckMap[instructionUUID] = JsonConvert.DeserializeObject<Dictionary<string,int>>(deck);
         readyUpCount += 1;
         if(readyUpCount == _readyUpNeeded)
         {
@@ -384,13 +389,13 @@ public class GameManager : MonoBehaviour
         _networkManager.SendMessage(NetworkInstruction.copyCard,controller.card.id.ToString());
     }
 
-    public void UnreadyUp(string uuid)
+    public void UnreadyUp(string instructionUUID)
     {
-        if(!uuidToPlayer.ContainsKey(uuid))
+        if(!uuidToPlayer.ContainsKey(instructionUUID))
         {
             return;
         }
-        uuidToPlayer[uuid].library = null;
+        uuidToPlayer[instructionUUID].library = null;
         readyUpCount -= 1;
     }
 
@@ -398,14 +403,14 @@ public class GameManager : MonoBehaviour
     {
         _networkManager.SendMessage(NetworkInstruction.updateDecks,JsonConvert.SerializeObject(clientPlayer.GetDeckDescriptions()) );
     }
-    public void UpdateDecks(string uuid, string decks)
+    public void UpdateDecks(string instructionUUID, string decks)
     {
-        if(!uuidToPlayer.ContainsKey(uuid))
+        if(!uuidToPlayer.ContainsKey(instructionUUID))
         {
-            Debug.LogError($"Unable to find player {uuid}");
+            Debug.LogError($"Unable to find player {instructionUUID}");
             return;
         }
-        Player p = uuidToPlayer[uuid];
+        Player p = uuidToPlayer[instructionUUID];
         if(p == clientPlayer)
         {
             return; // Skip client
@@ -414,11 +419,11 @@ public class GameManager : MonoBehaviour
         p.UpdateDecks(newDecks);
     }
 
-    public void UpdateRevealDeck(string uuid)
+    public void UpdateRevealDeck(string instructionUUID)
     {
-        Player player = uuidToPlayer[uuid];
+        Player player = uuidToPlayer[instructionUUID];
         player.library._revealTopCard = !player.library._revealTopCard;
-        player.library.UpdatePhysicalDeck();
+        player.library.UpdateContainer();
     }
 
     public void NetworkUpdateDeck()
@@ -523,7 +528,7 @@ public class GameManager : MonoBehaviour
         _networkManager.SendMessage(NetworkInstruction.createRelatedCard, $"{id}|{relatedCardName}");
     }
 
-    public void ReceiveCreateReleatedCard(string uuid, string instruction)
+    public void ReceiveCreateReleatedCard(string instructionUUID, string instruction)
     {
         if (string.IsNullOrEmpty(instruction))
         {
@@ -553,10 +558,10 @@ public class GameManager : MonoBehaviour
         }
         if(cardId < 0)
         {
-            uuidToPlayer[uuid].boardScript.mainField.GetComponent<CardOnFieldBoard>().AddCardToContainer(relatedCard, null);
+            uuidToPlayer[instructionUUID].boardScript.mainField.GetComponent<CardOnFieldBoard>().AddCardToContainer(relatedCard, null);
             return;
         }
-        InsertCardNextToCard(uuid, relatedCard, cardId);
+        InsertCardNextToCard(instructionUUID, relatedCard, cardId);
     }
 
     public void SendChangeHealth()
@@ -564,15 +569,15 @@ public class GameManager : MonoBehaviour
         _networkManager.SendMessage(NetworkInstruction.changeHealth, clientPlayer.health.ToString());
     }
 
-    public void ReceiveChangeHealth(string uuid, string instruction)
+    public void ReceiveChangeHealth(string instructionUUID, string instruction)
     {
-        if (!uuidToPlayer.ContainsKey(uuid))
+        if (!uuidToPlayer.ContainsKey(instructionUUID))
         {
-            Debug.LogError($"Player not found in dict {uuid}");
+            Debug.LogError($"Player not found in dict {instructionUUID}");
             return;
         }
 
-        Player player = uuidToPlayer[uuid];
+        Player player = uuidToPlayer[instructionUUID];
         
         int newHealth;
         if (!int.TryParse(instruction, out newHealth))
@@ -585,4 +590,20 @@ public class GameManager : MonoBehaviour
         playerDescriptionController.UpdateHealthBars();
     }
     
+    public void SendRevealHand(RevealPlayerManager controller)
+    {
+        List<string> uuids = controller.GetSelectedPlayers();
+        List<int> cardInts = HelperFunctions.GetCardInts(handManager.GetCards());
+
+        _networkManager.SendMessage(NetworkInstruction.revealHand, JsonConvert.SerializeObject(new HandDescriptor(cardInts, uuids)));
+    }
+
+    public void ReceiveRevealHand(string instructionUUID, string instruction)
+    {
+        HandDescriptor descriptor = JsonConvert.DeserializeObject<HandDescriptor>(instruction);
+        if(descriptor.uuids.Contains(_uuid))
+        {
+            // _uiManager.RevealOpponentLibrary(descriptor, uuid);
+        }
+    }
 }
