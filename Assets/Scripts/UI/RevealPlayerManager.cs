@@ -23,12 +23,25 @@ public class RevealPlayerManager : MonoBehaviour
 
     List<(Toggle, string)> toggleables = new List<(Toggle, string)>();
 
-    public void EnableBox(List<Player> playersToSelect, Deck deck, bool enableInput)
+    [SerializeField] Button revealButton;
+
+    public void EnableBox(List<Player> playersToSelect, Deck? deck, bool enableInput)
     {
         Cleanup();
         input.gameObject.SetActive(enableInput);
         selectedDeck = deck;
         gameObject.SetActive(true);
+        if(deck == null)
+        {
+            revealButton.onClick.AddListener(() => GameManager.Instance.SendRevealHand(this));
+            revealButton.onClick.AddListener(() => GameManager.Instance._uiManager.Disable(this.transform));
+
+        }
+        else
+        {
+            revealButton.onClick.AddListener(() => GameManager.Instance.SendRevealedDeck(this, enableInput));
+            // revealButton.onClick.AddListener(() => GameManager.Instance._uiManager.Disable(this.transform));
+        }
         foreach(Player currentPlayer in playersToSelect)
         {
             Toggle newToggle = Instantiate(toggle);
@@ -61,9 +74,11 @@ public class RevealPlayerManager : MonoBehaviour
 
     void Cleanup()
     {
+        selectedDeck = null;
+        revealButton.onClick.RemoveAllListeners();
         foreach((Toggle t, string uuid) in toggleables)
         {
-            Destroy(t);
+            Destroy(t.gameObject);
         }
         toggleables.Clear();
     }

@@ -51,14 +51,19 @@ public class  DisplayContainerController : MonoBehaviour
     }
 
 
-    public void LoadPile(CardContainer container, List<Card> cardsToRender, bool interactable)
+    public void LoadPile(CardContainer container, List<Card> cardsToRender, bool interactable, string name)
     {
         gameObject.SetActive(true);
         this.interactable = interactable;
         renderEntireLibrary = cardsToRender == null;
         Cleanup();
         this.cardsToRender = cardsToRender;
-        boxName.text = container.GetName();
+        boxName.text = name;
+        if(container == null)
+        {
+            RenderContainer(cardsToRender);
+            return;
+        }
         currentContainer = container;
         // boxName.text = GetName(currentContainer.deckID);
         if(renderEntireLibrary)

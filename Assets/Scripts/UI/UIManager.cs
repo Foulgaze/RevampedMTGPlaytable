@@ -128,6 +128,11 @@ public class UIManager : MonoBehaviour
         errorMessage.SetActive(false);
     }
 
+    public void RemoveSelectedDeck()
+    {
+        currentSelectedDeck = null;
+    }
+
     public void SwitchToConnect()
     {
         connectMenu.SetActive(true);
@@ -299,7 +304,7 @@ public class UIManager : MonoBehaviour
         deck.cards = GameManager.Instance.IntToCards(descriptor.cards);
         if(descriptor.cardShowCount == null)
         {
-            revealHolder.LoadPile(deck,null,false);
+            revealHolder.LoadPile(deck,null,false,deck.GetName());
         }
         else
         {
@@ -309,14 +314,14 @@ public class UIManager : MonoBehaviour
                 return;
             }
             List<Card> cardsToRender = deck.cards.GetRange(deck.cards.Count - cardMax, cardMax);
-            revealHolder.LoadPile(deck,cardsToRender,false);
+            revealHolder.LoadPile(deck,cardsToRender,false, deck.GetName());
         }
     }
 
-    public void RevealOpponentHand(HandDescriptor descriptor, string uuid)
+    public void RevealOpponentHand(HandDescriptor descriptor, string name)
     {
         List<Card> handCards = GameManager.Instance.IntToCards(descriptor.cards);
-        // revealHolder.LoadPile();
+        revealHolder.LoadPile(null, handCards, false, name );
     }
 
     public void EnableRelatedCardsMenu(OnFieldCardRightClickController menu)
