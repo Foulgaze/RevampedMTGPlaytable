@@ -149,6 +149,11 @@ public class NetworkCommandHandler
                 GameManager.Instance.ReceiveChangeHealth(msgUUID, instruction);
                 break;
             }
+            case (int) NetworkInstruction.revealHand:
+            {
+                GameManager.Instance.ReceiveRevealHand(msgUUID, instruction);
+                break;
+            }
         }
     }
 }

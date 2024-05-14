@@ -132,7 +132,7 @@ public class GameManager : MonoBehaviour
     {
         AddUser(_uuid, "Gabe");
         _readyUpNeeded = 1;
-        ReadyUp(_uuid, "{ \"Plains\": 1, \"Serra Angel\": 1, \"Lightning Bolt\": 1, \"Counterspell\": 1, \"Giant Growth\": 1, \"Llanowar Elves\": 1, \"Doom Blade\": 1, \"Wrath of God\": 1, \"Black Lotus\": 1, \"Birds of Paradise\": 1, \"Lightning Helix\": 1 }");
+        ReadyUp(_uuid, "{ \"Plains\": 1, \"Serra Angel\": 1, \"Lightning Bolt\": 1, \"Counterspell\": 1, \"Giant Growth\": 1, \"Llanowar Elves\": 1, \"Doom Blade\": 1, \"Wrath of God\": 1, \"Black Lotus\": 1, \"Birds of Paradise\": 1, \"Lightning Helix\": 1, \"Darien, King of Kjeldor\": 1 }");
     }
 
     void Start()
@@ -178,25 +178,29 @@ public class GameManager : MonoBehaviour
         uuidToName.Remove(uuid); 
     }
 
-    public void SendRevealedDeck(RevealPlayerManager controller)
+    public void SendRevealedDeck(RevealPlayerManager controller, bool cardCountExists)
     {
         List<string> uuids = controller.GetSelectedPlayers();
         if(uuids.Count == 0)
         {
+            GameManager.Instance._uiManager.Disable(controller.transform);
             return;
         }
         LibraryDescriptor descriptor;
         List<int> allCards = HelperFunctions.GetCardInts(controller.selectedDeck.GetCards());
         int? cardShowCount = null;
-        if(controller.input.gameObject.activeInHierarchy)
+        Debug.Log($"Controller - {controller.input.gameObject.activeInHierarchy}");
+        if(cardCountExists)
         {
             int output;
             if(Int32.TryParse(controller.input.text, out output))
             {
                 cardShowCount = output;
             }
+            Debug.Log(cardShowCount);
         }
         descriptor = new LibraryDescriptor(allCards, controller.selectedDeck.deckID,uuids, cardShowCount);
+        GameManager.Instance._uiManager.Disable(controller.transform);
         _networkManager.SendMessage(NetworkInstruction.showCardContainer, JsonConvert.SerializeObject(descriptor));
     }
 
@@ -603,7 +607,7 @@ public class GameManager : MonoBehaviour
         HandDescriptor descriptor = JsonConvert.DeserializeObject<HandDescriptor>(instruction);
         if(descriptor.uuids.Contains(_uuid))
         {
-            // _uiManager.RevealOpponentLibrary(descriptor, uuid);
+            _uiManager.RevealOpponentHand(descriptor, $"{uuidToPlayer[instructionUUID].name}'s hand");
         }
     }
 }
