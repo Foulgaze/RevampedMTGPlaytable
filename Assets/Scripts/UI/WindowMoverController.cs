@@ -35,16 +35,29 @@ public class WindowMoverController : MonoBehaviour
         offset = Input.mousePosition - rt.transform.position;
     }
 
-    void Update()
+        void Update()
     {
-        if(IsReleasingWindow())
+        if (IsReleasingWindow())
         {
             ReleaseWindow();
         }
 
-        if(IsDraggingWindow())
+        if (IsDraggingWindow())
         {
-            currentWindow.transform.position = (Vector2) Input.mousePosition - offset;
+            Vector2 newPosition = (Vector2)Input.mousePosition - offset;
+            newPosition = ClampToScreen(newPosition);
+            currentWindow.position = newPosition;
         }
+    }
+
+    Vector2 ClampToScreen(Vector2 position)
+    {
+        Vector2 minPosition = currentWindow.rect.size * currentWindow.pivot;
+        Vector2 maxPosition = new Vector2(Screen.width, Screen.height) - (currentWindow.rect.size * (Vector2.one - currentWindow.pivot));
+
+        position.x = Mathf.Clamp(position.x, minPosition.x, maxPosition.x);
+        position.y = Mathf.Clamp(position.y, minPosition.y, maxPosition.y);
+
+        return position;
     }
 }
