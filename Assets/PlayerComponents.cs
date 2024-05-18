@@ -5,6 +5,5 @@ using TMPro;
 public class PlayerComponents : MonoBehaviour
 {
     public TextMeshProUGUI name;
-    public TMP_InputField healthInput;
-    public TextMeshProUGUI healthText;
+    public TMP_InputField healthInput; 
 }

@@ -27,7 +27,7 @@ public class PlayerDescriptionController : MonoBehaviour
             clientPlayer.healthInput.text = health.ToString();
             return;
         }
-        enemyPlayer.healthText.text = health.ToString();
+        enemyPlayer.healthInput.text = health.ToString();
     }
 
     public void UpdateHealthBars()
@@ -35,7 +35,7 @@ public class PlayerDescriptionController : MonoBehaviour
         clientPlayer.healthInput.text = GameManager.Instance.clientPlayer.health.ToString();
         clientPlayer.name.text = GameManager.Instance.clientPlayer.name;
         Player currentPlayer = GameManager.Instance.boardMovement.GetCurrentPlayer();
-        enemyPlayer.healthText.text = currentPlayer.health.ToString();
+        enemyPlayer.healthInput.text = currentPlayer.health.ToString();
         enemyPlayer.name.text = currentPlayer.name;
     }
 
