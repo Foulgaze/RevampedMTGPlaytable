@@ -29,9 +29,8 @@ public class UIManager : MonoBehaviour
     public Transform libraryPileRightClickMenu;
     public Transform genericPileRightClickMenu;
 
-    [SerializeField]
-    Transform drawCardBox;
-
+    [SerializeField] SingleInputMenuController singleInputMenuController;
+    
     [SerializeField]
     public Transform cardContainerDisplayHolder;
 
@@ -175,17 +174,17 @@ public class UIManager : MonoBehaviour
 
     public void EnableDrawCardsBox()
     {
-        GameManager.Instance.gameInteractable = false;
-        drawCardBox.transform.position = new Vector3(Screen.width/2, Screen.height/2, 0);
-        drawCardBox.gameObject.SetActive(true);
-        drawCardBox.SetAsLastSibling();
-        DisableRightClickMenu();
+        singleInputMenuController.InitMenu("Draw Cards", "Draw",() => {GameManager.Instance.playerController.DrawCards(singleInputMenuController.inputField);});
     }
 
-    public void DisableDrawCardsBox()
+    public void EnableMillBox()
     {
-        GameManager.Instance.gameInteractable = true;
-        drawCardBox.gameObject.SetActive(false);
+        singleInputMenuController.InitMenu("Mill Cards", "Mill",() => {GameManager.Instance.playerController.MillXCards(singleInputMenuController.inputField);});
+    }
+
+    public void EnableExileBox()
+    {
+        singleInputMenuController.InitMenu("Exile Cards", "Exile",() => {GameManager.Instance.playerController.ExileXCards(singleInputMenuController.inputField);});
     }
 
     public void EnableLibraryRightClickMenu(Deck deck,Transform menuTransform )
@@ -214,12 +213,6 @@ public class UIManager : MonoBehaviour
         changePowerToughnessMenu.gameObject.SetActive(true);
         OnFieldCardRightClickController controller = cardOnFieldRightClickMenu.GetComponent<OnFieldCardRightClickController>();
         changePowerToughnessMenu.InitMenu(controller.card);
-    }
-
-
-    public void DisableRightClickMenu()
-    {
-        libraryPileRightClickMenu.gameObject.SetActive(false);
     }
 
     public Transform ShowCardContainer()

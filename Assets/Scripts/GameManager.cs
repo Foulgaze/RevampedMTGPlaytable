@@ -64,6 +64,7 @@ public class GameManager : MonoBehaviour
     public TextureLoader textureLoader;
     public HandManager handManager;
     public PlayerDescriptionController playerDescriptionController;
+    public PlayerController playerController;
 
     [SerializeReference]
     NetworkManager _networkManager;
