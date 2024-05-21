@@ -133,7 +133,7 @@ public class GameManager : MonoBehaviour
     {
         AddUser(_uuid, "Gabe");
         _readyUpNeeded = 1;
-        ReadyUp(_uuid, "{ \"Plains\": 1, \"Serra Angel\": 1, \"Lightning Bolt\": 1, \"Counterspell\": 1, \"Giant Growth\": 1, \"Llanowar Elves\": 1, \"Doom Blade\": 1, \"Wrath of God\": 1, \"Black Lotus\": 1, \"Birds of Paradise\": 1, \"Lightning Helix\": 1, \"Darien, King of Kjeldor\": 1 }");
+        ReadyUp(_uuid, "{ \"Plains\": 1, \"Serra Angel\": 1, \"Lightning Bolt\": 100, \"Counterspell\": 1, \"Giant Growth\": 1, \"Llanowar Elves\": 1, \"Doom Blade\": 1, \"Wrath of God\": 1, \"Black Lotus\": 1, \"Birds of Paradise\": 1, \"Lightning Helix\": 1, \"Darien, King of Kjeldor\": 1 }");
     }
 
     void Start()
@@ -150,6 +150,16 @@ public class GameManager : MonoBehaviour
         {
             _uiManager.SwitchToConnect();
         }
+    }
+
+    public List<Player> GetPlayerList(bool includeClient)
+    {
+        List<Player> players = uuidToPlayer.Values.ToList();
+        if(!includeClient)
+        {
+            players.Remove(clientPlayer);
+        }
+        return players;
     }
 
     IEnumerator DelayedStart()
@@ -179,9 +189,9 @@ public class GameManager : MonoBehaviour
         uuidToName.Remove(uuid); 
     }
 
-    public void SendRevealedDeck(RevealPlayerManager controller, bool cardCountExists)
+    public void SendRevealedDeck(RevealPlayerManager controller)
     {
-        List<string> uuids = controller.GetSelectedPlayers();
+                List<string> uuids = controller.GetSelectedPlayers();
         if(uuids.Count == 0)
         {
             GameManager.Instance._uiManager.Disable(controller.transform);
@@ -190,11 +200,10 @@ public class GameManager : MonoBehaviour
         LibraryDescriptor descriptor;
         List<int> allCards = HelperFunctions.GetCardInts(controller.selectedDeck.GetCards());
         int? cardShowCount = null;
-        Debug.Log($"Controller - {controller.input.gameObject.activeInHierarchy}");
-        if(cardCountExists)
+        if(controller.hasCardCount)
         {
             int output;
-            if(Int32.TryParse(controller.input.text, out output))
+            if(Int32.TryParse(controller.cardCountInput.text, out output))
             {
                 cardShowCount = output;
             }

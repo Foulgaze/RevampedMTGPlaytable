@@ -30,7 +30,6 @@ public class BoardMovement : MonoBehaviour
         {
             return;
         }
-        Debug.Log($"Moving");
         _moving = true;
         _sinTime = 0;
         _currentIndex = Input.GetKeyDown(KeyCode.RightArrow) ? _currentIndex + 1 : _currentIndex - 1;

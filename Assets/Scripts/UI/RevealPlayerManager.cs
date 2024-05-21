@@ -1,3 +1,4 @@
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using TMPro;
@@ -6,57 +7,47 @@ using UnityEngine.UI;
 
 public class RevealPlayerManager : MonoBehaviour
 {
-    [SerializeField]
-    Toggle toggle;
-
-    public TMP_InputField input;
-
-
-    [SerializeField]
-    Transform topBar;
-
-    [SerializeField]
-    Transform bottomBar;
-
-    [HideInInspector]
-    public Deck selectedDeck;
+    [SerializeField] Transform userToggle;
+    [SerializeField] Transform toggleHolder;
+    [HideInInspector] public Deck selectedDeck;
 
     List<(Toggle, string)> toggleables = new List<(Toggle, string)>();
 
     [SerializeField] Button revealButton;
+    public TMP_InputField cardCountInput;
 
-    public void EnableBox(List<Player> playersToSelect, Deck? deck, bool enableInput)
+    public bool hasCardCount;
+
+    public void InitMenu(List<Player> playersToSelect, Deck? deck, bool passToCardCountWindow)
     {
         Cleanup();
-        input.gameObject.SetActive(enableInput);
         selectedDeck = deck;
         gameObject.SetActive(true);
-        if(deck == null)
+        hasCardCount = passToCardCountWindow;
+        CreateToggles(playersToSelect);
+        if(passToCardCountWindow)
         {
-            revealButton.onClick.AddListener(() => GameManager.Instance.SendRevealHand(this));
-            revealButton.onClick.AddListener(() => GameManager.Instance._uiManager.Disable(this.transform));
-
+            revealButton.onClick.AddListener(() => {GameManager.Instance._uiManager.EnableRevealTopCardsToPlayers(this);});
         }
         else
         {
-            revealButton.onClick.AddListener(() => GameManager.Instance.SendRevealedDeck(this, enableInput));
-            // revealButton.onClick.AddListener(() => GameManager.Instance._uiManager.Disable(this.transform));
+            revealButton.onClick.AddListener(() => {GameManager.Instance.SendRevealedDeck(this);});
         }
+        revealButton.onClick.AddListener(() => {GameManager.Instance._uiManager.Disable(this.transform);});
+
+        transform.SetAsLastSibling();
+    }
+
+
+    void CreateToggles(List<Player> playersToSelect)
+    {
         foreach(Player currentPlayer in playersToSelect)
         {
-            Toggle newToggle = Instantiate(toggle);
-            newToggle.transform.SetParent(transform);
-            TextMeshProUGUI name = newToggle.transform.Find("name").GetComponent<TextMeshProUGUI>();
-            name.text = currentPlayer.name;
-            toggleables.Add((newToggle, currentPlayer.uuid));
+            Transform user = Instantiate(userToggle);
+            user.transform.SetParent(toggleHolder);
+            user.transform.GetChild(0).GetComponent<TextMeshProUGUI>().text = currentPlayer.name;
+            toggleables.Add((user.transform.GetChild(1).GetComponent<Toggle>(), currentPlayer.uuid));
         }
-        if(enableInput)
-        {
-            input.transform.SetAsFirstSibling();
-        }
-        topBar.SetAsFirstSibling();
-        bottomBar.SetAsLastSibling();
-        transform.SetAsLastSibling();
     }
 
     public List<string> GetSelectedPlayers()

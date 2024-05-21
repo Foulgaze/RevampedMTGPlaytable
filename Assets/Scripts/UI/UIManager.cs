@@ -40,10 +40,7 @@ public class UIManager : MonoBehaviour
     RevealPlayerManager selectPlayerMenu;
 
     [SerializeField]
-    Transform playerButton;
-
-    [SerializeField]
-    DisplayContainerController revealHolder;
+    DisplayContainerController opponentCardContainerController;
     [SerializeField]
     OnFieldCardRightClickController cardOnFieldRightClickMenu;
     [SerializeField]
@@ -187,6 +184,17 @@ public class UIManager : MonoBehaviour
         singleInputMenuController.InitMenu("Exile Cards", "Exile",() => {GameManager.Instance.playerController.ExileXCards(singleInputMenuController.inputField);});
     }
 
+    public void EnableRevealTopCards()
+    {
+        singleInputMenuController.InitMenu("Reveal Cards", "Reveal",() => {GameManager.Instance.playerController.ViewTopXLibrary(singleInputMenuController.inputField, currentSelectedDeck);});
+    }
+
+    public void EnableRevealTopCardsToPlayers(RevealPlayerManager revealPlayerManager)
+    {
+        singleInputMenuController.InitMenu("Reveal Cards", "Reveal",() => {GameManager.Instance.SendRevealedDeck(revealPlayerManager);});
+    }
+    
+
     public void EnableLibraryRightClickMenu(Deck deck,Transform menuTransform )
     {
         skipDisablingMenus= true;
@@ -276,19 +284,10 @@ public class UIManager : MonoBehaviour
         GameManager.Instance.UnReady();
         ChangeReadyStatus();
     }
-
-    public void SelectPlayerMenu(bool showCardCount)
+    
+    public void EnableSelectPlayerMenu(bool passToCardCountWindow)
     {
-        GameManager manager = GameManager.Instance;
-        List<Player> players = new List<Player>();
-        foreach(Player player in manager.uuidToPlayer.Values)
-        {
-            if(player != manager.clientPlayer)
-            {
-                players.Add(player);
-            }
-        }
-        selectPlayerMenu.EnableBox(players, currentSelectedDeck, showCardCount);
+        selectPlayerMenu.InitMenu(GameManager.Instance.GetPlayerList(true), currentSelectedDeck, passToCardCountWindow);
     }
 
     public void RevealOpponentLibrary(LibraryDescriptor descriptor, string uuid)
@@ -297,7 +296,7 @@ public class UIManager : MonoBehaviour
         deck.cards = GameManager.Instance.IntToCards(descriptor.cards);
         if(descriptor.cardShowCount == null)
         {
-            revealHolder.LoadPile(deck,null,false,deck.GetName());
+            opponentCardContainerController.LoadPile(deck,null,false,deck.GetName());
         }
         else
         {
@@ -307,14 +306,14 @@ public class UIManager : MonoBehaviour
                 return;
             }
             List<Card> cardsToRender = deck.cards.GetRange(deck.cards.Count - cardMax, cardMax);
-            revealHolder.LoadPile(deck,cardsToRender,false, deck.GetName());
+            opponentCardContainerController.LoadPile(deck,cardsToRender,false, deck.GetName());
         }
     }
 
     public void RevealOpponentHand(HandDescriptor descriptor, string name)
     {
         List<Card> handCards = GameManager.Instance.IntToCards(descriptor.cards);
-        revealHolder.LoadPile(null, handCards, false, name );
+        opponentCardContainerController.LoadPile(null, handCards, false, name );
     }
 
     public void EnableRelatedCardsMenu(OnFieldCardRightClickController menu)

@@ -4,31 +4,8 @@ using TMPro;
 using UnityEngine;
 public class PlayerDescriptionController : MonoBehaviour
 {
-    [SerializeField]
-    PlayerComponents clientPlayer;
-    [SerializeField]
-    PlayerComponents enemyPlayer;
-
-    public void SetName(string name, bool client)
-    {
-        if(client)
-        {
-            clientPlayer.name.text = name;
-            return;
-        }
-        enemyPlayer.name.text = name;
-
-    }
-
-    public void SetHealth(int health, bool client)
-    {
-        if(client)
-        {
-            clientPlayer.healthInput.text = health.ToString();
-            return;
-        }
-        enemyPlayer.healthInput.text = health.ToString();
-    }
+    [SerializeField] PlayerComponents clientPlayer;
+    [SerializeField] PlayerComponents enemyPlayer;
 
     public void UpdateHealthBars()
     {
@@ -58,7 +35,7 @@ public class PlayerDescriptionController : MonoBehaviour
         GameManager.Instance.SendChangeHealth();
     }
     public void DecreaseClientHealth()
-    {
+     {
         // int newHealth = HelperFunctions.ChangeIntputField(clientPlayer.healthInput.text, false);
         GameManager.Instance.clientPlayer.health -= 1;
         GameManager.Instance.SendChangeHealth();

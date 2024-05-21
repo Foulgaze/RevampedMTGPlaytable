@@ -186,7 +186,7 @@ public class  DisplayContainerController : MonoBehaviour
 
     void SetupCardForHolder(RectTransform rt)
     {
-        rt.sizeDelta = layout.cellSize;
+        // rt.sizeDelta = layout.cellSize;
         rt.transform.SetParent(layout.transform);
         rt.localScale = Vector3.one;
         rt.localRotation = Quaternion.identity;
@@ -194,7 +194,7 @@ public class  DisplayContainerController : MonoBehaviour
 
     void SetGridValues(int cardCount)
     {
-        Vector2 sizeDelta = cardHolder.sizeDelta;
+        Vector2 sizeDelta = cardHolder.rect.size;
         int spacingValue = (int) (sizeDelta.x * 0.025f);
         int paddingValue = (int) (sizeDelta.x * 0.035f);
         RectOffset padding = new RectOffset(paddingValue,paddingValue,paddingValue,paddingValue);
@@ -207,7 +207,9 @@ public class  DisplayContainerController : MonoBehaviour
         layout.spacing = spacing;
         layout.padding = padding;
         cardDimensions = new Vector2(cardWidth, cardHeight);
-        float totalHeight = paddingValue * 2 + (cardCount/cardsPerRow * cardHeight)  + (spacingValue * (cardCount - 1));
+        int verticalCardCount = (int)Mathf.Ceil((float)cardCount/cardsPerRow);
+        float totalHeight = paddingValue * 2 + (verticalCardCount * cardHeight)  + (spacingValue * (verticalCardCount - 1));
+        Debug.Log($"Total Height - {totalHeight}");
         totalHeight = Mathf.Max(totalHeight, scrollView.sizeDelta.y);
         cardHolder.sizeDelta = new Vector2(sizeDelta.x, totalHeight);
     }
