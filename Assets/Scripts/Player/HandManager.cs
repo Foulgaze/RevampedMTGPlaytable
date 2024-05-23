@@ -51,14 +51,7 @@ public class HandManager : MonoBehaviour, CardContainer
 
     public bool CardInHand(Card checkCard)
     {
-        foreach(Card card in cards)
-        {
-            if(checkCard == card)
-            {
-                return true;
-            }
-        }
-        return false;
+        return cards.Contains(checkCard);
     }
 
     public bool IsHoldingCard()
@@ -81,24 +74,12 @@ public class HandManager : MonoBehaviour, CardContainer
         heldCard = card;
         heldCard.ResetPivot();
         this.offset = cardInHand ? offset : Vector2.zero;
-        if(cardInHand)
-        {
-            RemoveCardFromContainer(card);
-        } 
-        else if(CardInDeckDisplayView())
+        card.currentLocation.RemoveCardFromContainer(card);
+        if(CardInDeckDisplayView())
         {
             DisplayContainerController controller = GameManager.Instance._uiManager.cardContainerDisplayHolder.GetComponent<DisplayContainerController>();
-            controller.currentContainer.RemoveCardFromContainer(card);
             card.GetInHandRect().SetParent(_handParent);
             inDeckDisplayView = true;
-        }
-        else if(lastHoveredPile != null)
-        {
-            CardContainer container =  lastHoveredPile.GetComponent<CardContainer>();
-            if(container != null)
-            {
-                container.RemoveCardFromContainer(card);
-            }
         }
     }
     
@@ -120,8 +101,7 @@ public class HandManager : MonoBehaviour, CardContainer
 
     public void ReleaseCard() // Honestly this whole function should be in a separate file.
     {
-        
-        bool inside = HelperFunctions.IsPointInRectTransform(Input.mousePosition, _checkHandBox, null);
+        bool insideHandBox = HelperFunctions.IsPointInRectTransform(Input.mousePosition, _checkHandBox, null);
         if(heldCard.ethereal) // TODO Refactor, ugly
         {
             bool released = false;
@@ -140,7 +120,7 @@ public class HandManager : MonoBehaviour, CardContainer
                 hoveredCard = null;
             }
         }
-        else if(inside)
+        else if(insideHandBox)
         {
             ReleaseCardInBox(heldCard);
             UpdateContainer();
@@ -161,6 +141,19 @@ public class HandManager : MonoBehaviour, CardContainer
             if(container != null)
             {
                 container.ReleaseCardInBox(heldCard);
+            }
+            else
+            {
+                CardOnFieldContainer onFieldContainer = lastHoveredPile.GetComponent<CardOnFieldContainer>();
+                if(onFieldContainer != null)
+                {
+                    onFieldContainer.EnterMouseOver();
+                }
+                else
+                {
+                    AddCardToContainer(heldCard, null);
+                    UpdateContainer();
+                }
             }
         }
         lastHoveredPile = null;

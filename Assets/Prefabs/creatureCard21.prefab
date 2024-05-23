@@ -106,7 +106,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 1609913206394771520, guid: c523179e3ebd70f4c8a0666e978f17b1, type: 3}
       propertyPath: m_Name
-      value: creatureCard Variant
+      value: creatureCard21
       objectReference: {fileID: 0}
     - target: {fileID: 5114829747332253048, guid: c523179e3ebd70f4c8a0666e978f17b1, type: 3}
       propertyPath: m_Sprite
@@ -114,7 +114,7 @@ PrefabInstance:
       objectReference: {fileID: 21300000, guid: 732bea873e3b91544b91f8a35c69944d, type: 3}
     - target: {fileID: 7339549410264274588, guid: c523179e3ebd70f4c8a0666e978f17b1, type: 3}
       propertyPath: m_RootOrder
-      value: 1
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 7339549410264274588, guid: c523179e3ebd70f4c8a0666e978f17b1, type: 3}
       propertyPath: m_LocalScale.x
