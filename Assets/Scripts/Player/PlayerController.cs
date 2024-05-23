@@ -77,24 +77,29 @@ public class PlayerController : MonoBehaviour
         GameManager.Instance._uiManager.cardContainerController.LoadPile(deck, null, true, deck.GetName());
     }
 
-    public void ViewTopXLibrary(LibraryInfoStorage storage)
+    public void ViewTopXLibrary(TMP_InputField input, Deck deck)
     {
+        if(deck == null)
+        {
+            Debug.LogError("Null deck");
+            return;
+        }
         if(GameManager.Instance._uiManager.cardContainerDisplayHolder.gameObject.activeInHierarchy)
         {
             HideCardContainer(GameManager.Instance._uiManager.cardContainerDisplayHolder.GetComponent<DisplayContainerController>());
         }
         int cardCount;
-        if(!Int32.TryParse(storage.input.text, out cardCount))
+        if(!Int32.TryParse(input.text, out cardCount))
         {
             return;
         }
-        List<Card> deckCards = storage.currentDeck.cards;
+        List<Card> deckCards = deck.cards;
         cardCount = Math.Min(cardCount,deckCards.Count());
         Transform library = GameManager.Instance._uiManager.ShowCardContainer();
         library.position = new Vector3(Screen.width/2, Screen.height/2, 0);
         DisplayContainerController controller = library.GetComponent<DisplayContainerController>();
         List<Card> viewableCards = deckCards.GetRange(deckCards.Count - cardCount, cardCount);
-        controller.LoadPile(storage.currentDeck, viewableCards, true,storage.currentDeck.GetName());
+        controller.LoadPile(deck, viewableCards, true,deck.GetName());
     }
 
     public void HideCardContainer(DisplayContainerController controller)

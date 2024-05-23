@@ -23,6 +23,7 @@ public class CardManager : MonoBehaviour
                 Debug.LogError($"Unable to load card {cardName}");
                 continue;
             }
+            newCard.currentLocation = deck;
             deck.AddCard(newCard);
         }
     }

@@ -6,7 +6,7 @@ using UnityEngine.EventSystems;
 public class WindowMover : MonoBehaviour, IPointerDownHandler
 {
     WindowMoverController controller;
-    RectTransform rt;
+    [SerializeField] RectTransform rt;
 
     public void OnPointerDown(PointerEventData eventData)
     {
@@ -16,7 +16,10 @@ public class WindowMover : MonoBehaviour, IPointerDownHandler
     void Start()
     {
         controller = GameManager.Instance.windowController;
-        rt = transform.GetComponent<RectTransform>();
+        if(rt == null)
+        {
+            rt = transform.GetComponent<RectTransform>();
+        }
     }
 
 }
