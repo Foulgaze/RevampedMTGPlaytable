@@ -37,7 +37,6 @@ public class BoardMovement : MonoBehaviour
         _currentIndex %= _players.Length;
         Transform nextBoard = _players[_currentIndex].boardScript.transform;
         _endPosition = new Vector3(nextBoard.position.x, clientBoard.position.y, clientBoard.position.z);
-        GameManager.Instance.playerDescriptionController.UpdateHealthBars();
     }
 
     public Player GetCurrentPlayer()
@@ -56,12 +55,18 @@ public class BoardMovement : MonoBehaviour
             _sinTime = 0;
             _moving = false;
             clientBoard.position = _endPosition;
+            GameManager.Instance.playerDescriptionController.UpdateHealthBars();
             return;
         }
         _sinTime += Time.deltaTime * _moveSpeed;
         _sinTime = Mathf.Clamp(_sinTime, 0, Mathf.PI);
         float t = evaluate(_sinTime);
         clientBoard.position = Vector3.Lerp(clientBoard.position, _endPosition, t);
+    }
+
+    void Update()
+    {
+        CheckForMovement();       
     }
     
     void FixedUpdate()
@@ -71,7 +76,6 @@ public class BoardMovement : MonoBehaviour
             UpdateMovement();
             return;
         }
-        CheckForMovement();       
     }
 
     float evaluate(float x)

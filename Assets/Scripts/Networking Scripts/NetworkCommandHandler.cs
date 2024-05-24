@@ -154,6 +154,11 @@ public class NetworkCommandHandler
                 GameManager.Instance.ReceiveRevealHand(msgUUID, instruction);
                 break;
             }
+            case (int) NetworkInstruction.GiveCardOnField:
+            {
+                GameManager.Instance.ReceiveGiveCard(instruction);
+                break;
+            }
         }
     }
 }

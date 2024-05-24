@@ -48,7 +48,7 @@ public class CardMover : MonoBehaviour, IPointerDownHandler, IPointerEnterHandle
 
       public void OnPointerDown(PointerEventData eventData)
     {
-        if(handManager.IsHoldingCard() || !GameManager.Instance.gameInteractable || !card.interactable)
+        if(handManager.IsHoldingCard() || !GameManager.Instance.gameInteractable || !card.interactable || card.currentLocation.GetOwner() != GameManager.Instance.clientPlayer.id)
         {
             return;
         }

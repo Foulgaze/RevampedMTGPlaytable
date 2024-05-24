@@ -5,6 +5,7 @@ using System.Linq;
 using CsvHelper.Configuration.Attributes;
 using TMPro;
 using UnityEngine;
+using UnityEngine.Events;
 using UnityEngine.UI;
 
 public class UIManager : MonoBehaviour
@@ -191,7 +192,13 @@ public class UIManager : MonoBehaviour
 
     public void EnableRevealTopCardsToPlayers(RevealPlayerManager revealPlayerManager)
     {
-        singleInputMenuController.InitMenu("Reveal Cards", "Reveal",() => {GameManager.Instance.SendRevealedDeck(revealPlayerManager);});
+        singleInputMenuController.InitMenu("Reveal Cards", "Reveal",() => {GameManager.Instance.SendRevealedDeck(revealPlayerManager, currentSelectedDeck   );});
+    }
+
+    public void EnableGiveCardToPlayer(OnFieldCardRightClickController controller)
+    {
+        Action action = new Action(() => {GameManager.Instance.SendGiveCard(selectPlayerMenu, true, controller.card);});
+        selectPlayerMenu.InitMenu(GameManager.Instance.GetPlayerList(false),  action, false, true);
     }
     
 
@@ -287,7 +294,16 @@ public class UIManager : MonoBehaviour
     
     public void EnableSelectPlayerMenu(bool passToCardCountWindow)
     {
-        selectPlayerMenu.InitMenu(GameManager.Instance.GetPlayerList(true), currentSelectedDeck, passToCardCountWindow);
+        Action action;
+        if(passToCardCountWindow)
+        {
+            action = new Action(() => {GameManager.Instance._uiManager.EnableRevealTopCardsToPlayers(selectPlayerMenu);});
+        }
+        else
+        {
+            action = new Action(() => {GameManager.Instance.SendRevealedDeck(selectPlayerMenu, currentSelectedDeck);});
+        }
+        selectPlayerMenu.InitMenu(GameManager.Instance.GetPlayerList(false), action, passToCardCountWindow);
     }
 
     public void RevealOpponentLibrary(LibraryDescriptor descriptor, string uuid)

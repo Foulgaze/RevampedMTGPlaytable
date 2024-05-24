@@ -7,46 +7,52 @@ using UnityEngine.UI;
 
 public class RevealPlayerManager : MonoBehaviour
 {
-    [SerializeField] Transform userToggle;
+    [SerializeField] Transform userTogglePrefab;
     [SerializeField] Transform toggleHolder;
-    [HideInInspector] public Deck selectedDeck;
-
+    
     List<(Toggle, string)> toggleables = new List<(Toggle, string)>();
 
-    [SerializeField] Button revealButton;
+    [SerializeField] Button confirmButton;
     public TMP_InputField cardCountInput;
 
     public bool hasCardCount;
 
-    public void InitMenu(List<Player> playersToSelect, Deck? deck, bool passToCardCountWindow)
+    public void InitMenu(List<Player> playersToSelect, Action onConfirm, bool passToCardCountWindow = false, bool exclusiveToggle = false)
     {
         Cleanup();
-        selectedDeck = deck;
         gameObject.SetActive(true);
         hasCardCount = passToCardCountWindow;
-        CreateToggles(playersToSelect);
-        if(passToCardCountWindow)
-        {
-            revealButton.onClick.AddListener(() => {GameManager.Instance._uiManager.EnableRevealTopCardsToPlayers(this);});
-        }
-        else
-        {
-            revealButton.onClick.AddListener(() => {GameManager.Instance.SendRevealedDeck(this);});
-        }
-        revealButton.onClick.AddListener(() => {GameManager.Instance._uiManager.Disable(this.transform);});
+        CreateToggles(playersToSelect, exclusiveToggle);
+        confirmButton.onClick.AddListener(() => onConfirm());
+        confirmButton.onClick.AddListener(() => {GameManager.Instance._uiManager.Disable(this.transform);});
 
         transform.SetAsLastSibling();
     }
 
-
-    void CreateToggles(List<Player> playersToSelect)
+    void CreateToggles(List<Player> playersToSelect, bool exclusiveToggle)
     {
         foreach(Player currentPlayer in playersToSelect)
         {
-            Transform user = Instantiate(userToggle);
-            user.transform.SetParent(toggleHolder);
+            Transform user = Instantiate(userTogglePrefab);
+            user.SetParent(toggleHolder);
             user.transform.GetChild(0).GetComponent<TextMeshProUGUI>().text = currentPlayer.name;
-            toggleables.Add((user.transform.GetChild(1).GetComponent<Toggle>(), currentPlayer.uuid));
+            Toggle toggle = user.transform.GetChild(1).GetComponent<Toggle>();
+            if(exclusiveToggle)
+            {
+                toggle.onValueChanged.AddListener(delegate {UnToggleOthers(toggle);});
+            }
+            toggleables.Add((toggle, currentPlayer.uuid));
+        }
+    }
+
+    void UnToggleOthers(Toggle toggle)
+    {
+        foreach((Toggle t, string uuid) in toggleables)
+        {
+            if(t != toggle)
+            {
+                t.isOn = false;
+            }
         }
     }
 
@@ -65,11 +71,10 @@ public class RevealPlayerManager : MonoBehaviour
 
     void Cleanup()
     {
-        selectedDeck = null;
-        revealButton.onClick.RemoveAllListeners();
+        confirmButton.onClick.RemoveAllListeners();
         foreach((Toggle t, string uuid) in toggleables)
         {
-            Destroy(t.gameObject);
+            Destroy(t.transform.parent.gameObject);
         }
         toggleables.Clear();
     }
