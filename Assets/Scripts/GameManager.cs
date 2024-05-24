@@ -37,7 +37,7 @@ public enum NetworkInstruction
 {
     playerConnection, readyUp, userDisconnect, setLobbySize, chatboxMessage, unReady, 
     updateDecks, showCardContainer, revealTopCard, millXCards, copyCard, deleteCard, tapUnap, 
-    changePowerToughness, createRelatedCard, changeHealth, revealHand
+    changePowerToughness, createRelatedCard, changeHealth, revealHand, GiveCardOnField
 }
 
 public class GameManager : MonoBehaviour
@@ -190,16 +190,16 @@ public class GameManager : MonoBehaviour
         uuidToName.Remove(uuid); 
     }
 
-    public void SendRevealedDeck(RevealPlayerManager controller)
+    public void SendRevealedDeck(RevealPlayerManager controller, Deck deck)
     {
-                List<string> uuids = controller.GetSelectedPlayers();
+        List<string> uuids = controller.GetSelectedPlayers();
         if(uuids.Count == 0)
         {
             GameManager.Instance._uiManager.Disable(controller.transform);
             return;
         }
         LibraryDescriptor descriptor;
-        List<int> allCards = HelperFunctions.GetCardInts(controller.selectedDeck.GetCards());
+        List<int> allCards = HelperFunctions.GetCardInts(deck.GetCards());
         int? cardShowCount = null;
         if(controller.hasCardCount)
         {
@@ -210,7 +210,7 @@ public class GameManager : MonoBehaviour
             }
             Debug.Log(cardShowCount);
         }
-        descriptor = new LibraryDescriptor(allCards, controller.selectedDeck.deckID,uuids, cardShowCount);
+        descriptor = new LibraryDescriptor(allCards, deck.deckID,uuids, cardShowCount);
         GameManager.Instance._uiManager.Disable(controller.transform);
         _networkManager.SendMessage(NetworkInstruction.showCardContainer, JsonConvert.SerializeObject(descriptor));
     }
@@ -277,6 +277,73 @@ public class GameManager : MonoBehaviour
         Card copiedCard = CardManager.CopyCard(idToCard[id]);
         InsertCardNextToCard(uuid, copiedCard, id);
     }
+
+    public void SendGiveCard(RevealPlayerManager controller, bool onField, Card card)
+    {
+        List<string> uuids = controller.GetSelectedPlayers();
+        if(uuids.Count == 0)
+        {
+            return;
+        }
+        if(uuids.Count > 1)
+        {
+            Debug.LogError("Invalid Player Count");
+            return;
+        }
+        card.currentLocation.RemoveCardFromContainer(card);
+        SendUpdatedDecks();
+        _networkManager.SendMessage(NetworkInstruction.GiveCardOnField, $"{uuids[0]}|{card.id}");
+    }
+
+    public void ReceiveGiveCard(string instruction)
+    {
+
+        if (string.IsNullOrEmpty(instruction))
+        {
+            Debug.LogError("Received empty instruction");
+            return;
+        }
+
+        string[] parts = instruction.Split('|');
+        if (parts.Length != 2)
+        {
+            Debug.LogError("Invalid instruction format: " + instruction);
+            return;
+        }
+
+        string targetUUID = parts[0];
+
+        if (!uuidToPlayer.ContainsKey(targetUUID))
+        {
+            Debug.LogError($"Target player not found: {targetUUID}");
+            return;
+        }
+
+        if(targetUUID != _uuid)
+        {
+            return;
+        }
+        if (!int.TryParse(parts[1], out int cardId))
+        {
+            Debug.LogError("Invalid card ID format: " + parts[1]);
+            return;
+        }
+
+        if (!idToCard.ContainsKey(cardId))
+        {
+            Debug.LogError($"Card not found: {cardId}");
+            return;
+        }
+
+        Card card = idToCard[cardId];
+
+        Player targetPlayer = uuidToPlayer[targetUUID];
+        
+        targetPlayer.boardScript.GetCardOnFieldBoard(targetPlayer.boardScript.mainField).AddCardToContainer(card, null);
+        SendUpdatedDecks();
+    }
+
+    
 
     void InsertCardNextToCard(string uuid, Card card, int originalCardID)
     {
