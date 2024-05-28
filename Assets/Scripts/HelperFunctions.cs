@@ -64,7 +64,7 @@ public class HelperFunctions : MonoBehaviour
         List<int> cardInts = new List<int>();
         foreach(Card card in cards)
         {
-            cardInts.Add(card.id);
+            cardInts.Add(card.Id);
         }
         return cardInts;
     }

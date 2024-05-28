@@ -86,7 +86,7 @@ public class Deck : MonoBehaviour, CardContainer
         int topCard = -1;
         if(cards.Count != 0)
         {
-            topCard = cards[cards.Count - 1].id;
+            topCard = cards[cards.Count - 1].Id;
         }
         return new DeckDescriptor(cards.Count, topCard,(int) deckID, _revealTopCard, null);
     }

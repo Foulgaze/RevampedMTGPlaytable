@@ -46,7 +46,7 @@ public class CardOnFieldBoard : MonoBehaviour, CardContainer, RaycastableHolder
         List<int> cardsInHand = new List<int>();
         foreach(Card card in cards)
         {
-            cardsInHand.Add(card.id);
+            cardsInHand.Add(card.Id);
         }
         return new DeckDescriptor(0,0,(int) id,false,cardsInHand);
     }

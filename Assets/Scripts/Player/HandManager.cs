@@ -116,7 +116,7 @@ public class HandManager : MonoBehaviour, CardContainer
             }
             if(!released)
             {
-                GameManager.Instance.SendDestroyCard(heldCard.id);
+                GameManager.Instance.SendDestroyCard(heldCard.Id);
                 hoveredCard = null;
             }
         }

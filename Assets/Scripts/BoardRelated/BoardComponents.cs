@@ -66,7 +66,7 @@ public class BoardComponents : MonoBehaviour
         int count = 0;
         foreach(Card iterCard in mainField.GetComponent<CardOnFieldBoard>().cards)
         {
-            if(iterCard.id == id )
+            if(iterCard.Id == id )
             {
                 return (mainField.GetComponent<CardOnFieldBoard>(), count);
             }
@@ -75,7 +75,7 @@ public class BoardComponents : MonoBehaviour
         count = 0;
         foreach(Card iterCard in leftField.GetComponent<CardOnFieldBoard>().cards)
         {
-            if(iterCard.id == id )
+            if(iterCard.Id == id )
             {
                 return (leftField.GetComponent<CardOnFieldBoard>(), count);
             }
@@ -84,7 +84,7 @@ public class BoardComponents : MonoBehaviour
         count = 0;
         foreach(Card iterCard in rightField.GetComponent<CardOnFieldBoard>().cards)
         {
-            if(iterCard.id == id )
+            if(iterCard.Id == id )
             {
                 return (rightField.GetComponent<CardOnFieldBoard>(), count);
             }

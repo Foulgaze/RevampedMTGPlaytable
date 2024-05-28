@@ -220,7 +220,7 @@ public class PlayerController : MonoBehaviour
 
     public bool RemoveCardFromCurrentPosition(Card card)
     {
-        (CardOnFieldBoard? board, _) = GameManager.Instance.clientPlayer.boardScript.FindBoardContainingCard(card.id);
+        (CardOnFieldBoard? board, _) = GameManager.Instance.clientPlayer.boardScript.FindBoardContainingCard(card.Id);
         if(board == null)
         {
             return false;

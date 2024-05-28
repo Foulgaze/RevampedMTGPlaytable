@@ -292,7 +292,7 @@ public class GameManager : MonoBehaviour
         }
         card.currentLocation.RemoveCardFromContainer(card);
         SendUpdatedDecks();
-        _networkManager.SendMessage(NetworkInstruction.GiveCardOnField, $"{uuids[0]}|{card.id}");
+        _networkManager.SendMessage(NetworkInstruction.GiveCardOnField, $"{uuids[0]}|{card.Id}");
     }
 
     public void ReceiveGiveCard(string instruction)
@@ -351,7 +351,7 @@ public class GameManager : MonoBehaviour
         (CardOnFieldBoard? boardContainingCard, int position) = player.boardScript.FindBoardContainingCard(originalCardID);
         if(boardContainingCard == null)
         {
-            Debug.LogError($"Cannot find board containing card - {card.id}");
+            Debug.LogError($"Cannot find board containing card - {card.Id}");
             card.Destroy();
             return;
         }
@@ -468,7 +468,7 @@ public class GameManager : MonoBehaviour
         {
             return;
         }
-        _networkManager.SendMessage(NetworkInstruction.copyCard,controller.card.id.ToString());
+        _networkManager.SendMessage(NetworkInstruction.copyCard,controller.card.Id.ToString());
     }
 
     public void UnreadyUp(string instructionUUID)
@@ -549,7 +549,7 @@ public class GameManager : MonoBehaviour
 
     public void SendTapUntap(Card card)
 	{
-        _networkManager.SendMessage(NetworkInstruction.tapUnap, card.id.ToString());
+        _networkManager.SendMessage(NetworkInstruction.tapUnap, card.Id.ToString());
 	}
     public void ReceiveTapUnTap(string strID)
     {
@@ -570,7 +570,7 @@ public class GameManager : MonoBehaviour
     public void SendChangePowerToughness(bool power, Card card, int value)
     {
         string valueChanged = power ? "power" : "toughness";
-        _networkManager.SendMessage(NetworkInstruction.changePowerToughness, $"{valueChanged}:{card.id}:{value}");
+        _networkManager.SendMessage(NetworkInstruction.changePowerToughness, $"{valueChanged}:{card.Id}:{value}");
     }
 
     public void ReceieveChangePowerToughness(string changeInstruction)
