@@ -4,18 +4,17 @@ using System.Collections.Generic;
 public class Card
 {
 	public int Id {get;}
-
-	static List<string> typesThatRelateCards = new List<string>(){"meld", "transform", "modal_dfc"};
-
 	public CardInfo FrontInfo {get;}
 	public CardInfo BackInfo {get;}
-	public CardInfo CurrentInfo {get;}
+	public CardInfo CurrentInfo => isFlipped.Value ? BackInfo : FrontInfo;
 	public CardContainer CurrentLocation {get;set;}
 	public NetworkAttribute<int> power;
 	public NetworkAttribute<int> toughness;
 	public NetworkAttribute<bool> tapped;
 	public NetworkAttribute<string> name;
+	public NetworkAttribute<bool> isFlipped;
 	public bool ethereal = false;
+
 
 	public Card(int id,CardInfo FrontInfo, CardInfo BackInfo)
 	{
@@ -23,34 +22,36 @@ public class Card
 		this.FrontInfo = FrontInfo;
 		this.BackInfo = BackInfo;
 
-		power = NetworkAttributeManager.AddNetworkAttribute<int>(id.ToString(), ParsePT(Info.power));
-		toughness = NetworkAttributeManager.AddNetworkAttribute<int>(id.ToString(), ParsePT(Info.toughness));
-		tapped = NetworkAttributeManager.AddNetworkAttribute<bool>(id.ToString(),false);
-		
+		InitializeAttributes();		
 	}
 
 	/// <summary>
-	/// Check if current card info is backside
+	/// Checks if card has backside
 	/// </summary>
-	/// <returns>If card is flipped</returns>
-	public bool IsFlipped()
-	{		
-		return CurrentInfo != FrontInfo;
+	/// <returns><Returns true if the card has a backside/returns>
+	public bool HasBackside()
+	{
+		return this.BackInfo != null;
 	}
 
-	public bool FlipCard()
-	{	
-	
-	}
-
-    private void UpdateAttributes()
+	private void InitializeAttributes()
     {
-        power.Value = ParsePT(CurrentInfo.power);
-        toughness.Value = ParsePT(CurrentInfo.toughness);
-        // Update any other attributes as necessary
+		this.isFlipped = NetworkAttributeManager.AddNetworkAttribute<bool>(Id.ToString(), false);
+		this.isFlipped.valueChange += UpdateAttributes;	
+        this.power = NetworkAttributeManager.AddNetworkAttribute<int>(Id.ToString(), ParsePT(CurrentInfo.power));
+        this.toughness = NetworkAttributeManager.AddNetworkAttribute<int>(Id.ToString(), ParsePT(CurrentInfo.toughness));
+        this.tapped = NetworkAttributeManager.AddNetworkAttribute<bool>(Id.ToString(), false);
     }
 
-	int ParsePT(string value)
+
+    private void UpdateAttributes(object sender, EventArgs e) // No need to network because flipped is netwokred
+    {
+        this.power.NonNetworkedSet(ParsePT(CurrentInfo.power));
+        this.toughness.NonNetworkedSet(ParsePT(CurrentInfo.toughness));
+		this.name.NonNetworkedSet(CurrentInfo.name);
+    }
+
+	private int ParsePT(string value)
 	{
 		int parsedValue;
 		if(!Int32.TryParse(value, out parsedValue))

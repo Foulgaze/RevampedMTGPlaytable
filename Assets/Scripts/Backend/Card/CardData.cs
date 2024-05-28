@@ -9,7 +9,7 @@ public static class CardData
 	private static Dictionary<string, CardInfo> loadedTokens = new Dictionary<string, CardInfo>();
 
 
-	public static CardInfo? GetCard(string cardName)
+	public static CardInfo? GetCardInfo(string cardName)
 	{
 		if(loadedCards.ContainsKey(cardName))
 		{
