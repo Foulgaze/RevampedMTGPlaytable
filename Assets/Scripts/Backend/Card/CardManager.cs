@@ -6,66 +6,55 @@ using UnityEngine.AI;
 public static class CardManager
 {
     private static int cardID = 0;
+    private static List<string> twoSidedCardLayouts = new List<string>(){"meld", "transform", "modal_dfc"};
+    private static Dictionary<int, Card> idToCard = new Dictionary<int, Card>();
 
-    public static void LoadCards(List<string> cards)
+    /// <summary>
+    /// Loads a list of cards based on the provided card names.
+    /// </summary>
+    /// <param name="cardNames">A list of card names to load information for.</param>
+    /// <returns>A list of <see cref="Card"/> objects created from the provided card names.</returns>
+    public static List<Card> LoadCardNames(List<string> cardNames)
     {
-        for(int i = 0; i < cards.Count; ++i)
+        List<Card> cards = new List<Card>();
+        foreach(string cardName in cardNames)
         {
-            string cardName = cards[i]; 
-            int doubleSlashIndex = cardName.IndexOf("//");
-            if(doubleSlashIndex != -1)
+            CardInfo? info = CardData.GetCardInfo(cardName);
+            string frontName = "";
+            string? backName = null;
+            if(info == null)
             {
-                cardName = cardName.Substring(0, cardName.IndexOf("//")).Trim();
-            }
-            Card newCard = CreateCard(cardName);
-            if(newCard == null)
-            {
-                Debug.LogError($"Unable to load card {cardName}");
+                // To do
+                // Add logger
                 continue;
             }
-            newCard.currentLocation = deck;
-            deck.AddCard(newCard);
+            if(twoSidedCardLayouts.Contains(info.layout))
+            {
+                (frontName, backName) = GetFrontBackNames(info.name);
+            }
+            else
+            {
+                frontName = info.name;
+            }
+            Card newCard = new Card(cardID++, CardData.GetCardInfo(frontName), CardData.GetCardInfo(backName));
+            idToCard[newCard.Id] = newCard;
         }
-    }
-    public static Card CreateCard(string cardName)
-    {
-        if(!GameManager.Instance.nameToCardInfo.ContainsKey(cardName))
-        {
-            return null;
-        }
-        Card newCard = new Card(cardID++,GameManager.Instance.nameToCardInfo[cardName], GameManager.Instance);
-        GameManager.Instance.idToCard[newCard.Id] = newCard;
-        return newCard;
+        return cards;
     }
 
-    public static Card CopyCard(Card card)
+    private static (string, string?) GetFrontBackNames(string fullName)
     {
-        if(!GameManager.Instance.nameToCardInfo.ContainsKey(card.name))
+        fullName = fullName.Trim();
+
+        int doubleSlashIndex = fullName.IndexOf("//");
+        if(doubleSlashIndex == -1)
         {
-            return null;
+            return (fullName, null);
         }
-        Card newCard = new Card(card,cardID++, GameManager.Instance.nameToCardInfo[card.name], GameManager.Instance);
-        GameManager.Instance.idToCard[newCard.Id] = newCard;
-        return newCard;
-    }
-    // Can be combined with createcard probably :)
-    public static Card? CreateRelatedCard(string cardName)
-    {
-        if(!GameManager.Instance.nameToToken.ContainsKey(cardName) && !GameManager.Instance.nameToCardInfo.ContainsKey(cardName))
-        {
-            return null;
-        }
-        Card newCard;
-        if(GameManager.Instance.nameToToken.ContainsKey(cardName))
-        {
-            newCard = new Card(cardID++, GameManager.Instance.nameToToken[cardName], GameManager.Instance);
-        }
-        else
-        {
-            newCard = new Card(cardID++, GameManager.Instance.nameToCardInfo[cardName], GameManager.Instance);
-        }
-        GameManager.Instance.idToCard[newCard.Id] = newCard;
-        newCard.SetupEtherealCard();
-        return newCard;
+        string frontName = fullName.Substring(0, doubleSlashIndex);
+        string backName = fullName.Substring(doubleSlashIndex);
+        return (frontName, backName);
+
+
     }
 }

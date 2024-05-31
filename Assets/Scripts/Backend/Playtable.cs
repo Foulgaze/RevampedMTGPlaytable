@@ -57,7 +57,7 @@ public class Playtable
 
 	void StartGame()
 	{
-		GameStarted = true;
+		GameStarted = true; 
 		SetupDecks();
 		gameStarted(this, new PropertyChangedEventArgs("Started"));
 	}
@@ -66,8 +66,10 @@ public class Playtable
 	{
 		foreach(Player player in _players)
 		{
-			(List<string> cards, _) = CardParser.ParseDeckList(player.DeckListRaw.Value);
+			(List<string> cardNames, _) = CardParser.ParseDeckList(player.DeckListRaw.Value);
 			CardContainer library = player.GetCardContainer(CardZone.Library);
+			List<Card> cards = CardManager.LoadCardNames(cardNames);
+			cards.ForEach(card => library.AddCardToContainer(card, null,false));
 		}
 	}
 

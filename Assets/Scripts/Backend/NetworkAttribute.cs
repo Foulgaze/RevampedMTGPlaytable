@@ -8,6 +8,7 @@ public class NetworkAttribute<T>
 	public event PropertyChangedEventHandler valueChange = delegate {};
 	
 	private T value;
+	public bool changeHasBeenNetworked;
 	public T Value
 	{
 		get
@@ -16,7 +17,8 @@ public class NetworkAttribute<T>
 		}
 		set
 		{
-			networkValueChange(Id, new PropertyChangedEventArgs(JsonConvert.SerializeObject(value)));
+			this.changeHasBeenNetworked = true;
+			this.networkValueChange(Id, new PropertyChangedEventArgs(JsonConvert.SerializeObject(value)));
 		}
 	}
 	public string Id {get;}
@@ -24,11 +26,13 @@ public class NetworkAttribute<T>
 	{
 		this.Id = id;
 		this.value = value;
+		this.changeHasBeenNetworked = false;
 	}
 	public void NonNetworkedSet(T value)
 	{
 		this.value = value;
-		valueChange(this, new PropertyChangedEventArgs("NonNetworkChange"));
+		this.changeHasBeenNetworked = false;
+		this.valueChange(this, new PropertyChangedEventArgs("NonNetworkChange"));
 	}
 	
 }
