@@ -3,18 +3,18 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.AI;
 
-public static class CardManager
+public class CardFactory
 {
-    private static int cardID = 0;
-    private static List<string> twoSidedCardLayouts = new List<string>(){"meld", "transform", "modal_dfc"};
-    private static Dictionary<int, Card> idToCard = new Dictionary<int, Card>();
+    private int cardID = 0;
+    private List<string> twoSidedCardLayouts = new List<string>(){"meld", "transform", "modal_dfc"};
+    Dictionary<int, Card> idToCard = new Dictionary<int, Card>();
 
     /// <summary>
     /// Loads a list of cards based on the provided card names.
     /// </summary>
     /// <param name="cardNames">A list of card names to load information for.</param>
     /// <returns>A list of <see cref="Card"/> objects created from the provided card names.</returns>
-    public static List<Card> LoadCardNames(List<string> cardNames)
+    public List<Card> LoadCardNames(List<string> cardNames)
     {
         List<Card> cards = new List<Card>();
         foreach(string cardName in cardNames)
@@ -42,7 +42,15 @@ public static class CardManager
         return cards;
     }
 
-    private static (string, string?) GetFrontBackNames(string fullName)
+    public Card? GetCard(int cardID)
+    {
+        Card returnCard;
+        idToCard.TryGetValue(cardID, out returnCard);
+        return returnCard;
+    }
+
+
+    private (string, string?) GetFrontBackNames(string fullName)
     {
         fullName = fullName.Trim();
 

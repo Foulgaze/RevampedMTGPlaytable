@@ -14,23 +14,30 @@ public class Player
 
     public bool GameStarted {get;} = false;
 
-    private Dictionary<CardZone, CardContainer> zoneToContainer = new Dictionary<CardZone, CardContainer>();
-    public Player(string uuid, string name, int startingHealth)
+    private Dictionary<CardZone, CardContainerCollection> zoneToContainer = new Dictionary<CardZone, CardContainerCollection>();
+    public Player(string uuid, string name, int startingHealth, NetworkAttributeFactory networkAttributeFactory, CardFactory cardFactory)
     {
         this.Uuid = uuid;
         this.Name = name;
-        Health = NetworkAttributeManager.AddNetworkAttribute<int>(Uuid,startingHealth);
-        DeckListRaw = NetworkAttributeManager.AddNetworkAttribute<string>(Uuid,"");
-        ReadiedUp = NetworkAttributeManager.AddNetworkAttribute(Uuid,false);
-        InitializeBoards();
+        Health = networkAttributeFactory.AddNetworkAttribute<int>(Uuid,startingHealth);
+        DeckListRaw = networkAttributeFactory.AddNetworkAttribute<string>(Uuid,"");
+        ReadiedUp = networkAttributeFactory.AddNetworkAttribute(Uuid,false);
+        InitializeBoards(networkAttributeFactory, cardFactory);
     }
 
-    void InitializeBoards()
+    void InitializeBoards(NetworkAttributeFactory networkAttributeFactory, CardFactory cardFactory)
     {
-        foreach(CardZone zone in Enum.GetValues(typeof(CardZone)))
-        {
-            zoneToContainer[zone] = new CardContainer(zone, Uuid);
-        }
+        zoneToContainer[CardZone.Library] = new CardContainerCollection(CardZone.Library, this.Uuid, 1, null, networkAttributeFactory,cardFactory );
+        zoneToContainer[CardZone.Graveyard] = new CardContainerCollection(CardZone.Library, this.Uuid, 1, null, networkAttributeFactory,cardFactory );
+        zoneToContainer[CardZone.Exile] = new CardContainerCollection(CardZone.Library, this.Uuid, 1, null, networkAttributeFactory,cardFactory );
+        zoneToContainer[CardZone.CommandZone] = new CardContainerCollection(CardZone.Library, this.Uuid, 1, null, networkAttributeFactory,cardFactory );
+
+        zoneToContainer[CardZone.Hand] = new CardContainerCollection(CardZone.Library, this.Uuid, null, 1, networkAttributeFactory,cardFactory );
+
+        zoneToContainer[CardZone.MainField] = new CardContainerCollection(CardZone.Library, this.Uuid, null, 3, networkAttributeFactory,cardFactory );
+        zoneToContainer[CardZone.LeftField] = new CardContainerCollection(CardZone.Library, this.Uuid, null, 3, networkAttributeFactory,cardFactory );
+        zoneToContainer[CardZone.RightField] = new CardContainerCollection(CardZone.Library, this.Uuid, null, 3, networkAttributeFactory,cardFactory );
+
     }
 
     /// <summary>
@@ -38,7 +45,7 @@ public class Player
     /// </summary>
     /// <param name="zone">Zone to get</param>
     /// <returns>Requested zone</returns>
-    public CardContainer GetCardContainer(CardZone zone)
+    public CardContainerCollection GetCardContainer(CardZone zone)
     {
         return zoneToContainer[zone];
     }

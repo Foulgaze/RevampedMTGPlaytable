@@ -36,11 +36,11 @@ public class Card
 
 	private void InitializeAttributes()
     {
-		this.isFlipped = NetworkAttributeManager.AddNetworkAttribute<bool>(Id.ToString(), false);
+		this.isFlipped = NetworkAttributeFactory.AddNetworkAttribute<bool>(Id.ToString(), false);
 		this.isFlipped.valueChange += UpdateAttributes;	
-        this.power = NetworkAttributeManager.AddNetworkAttribute<int>(Id.ToString(), ParsePT(CurrentInfo.power));
-        this.toughness = NetworkAttributeManager.AddNetworkAttribute<int>(Id.ToString(), ParsePT(CurrentInfo.toughness));
-        this.tapped = NetworkAttributeManager.AddNetworkAttribute<bool>(Id.ToString(), false);
+        this.power = NetworkAttributeFactory.AddNetworkAttribute<int>(Id.ToString(), ParsePT(CurrentInfo.power));
+        this.toughness = NetworkAttributeFactory.AddNetworkAttribute<int>(Id.ToString(), ParsePT(CurrentInfo.toughness));
+        this.tapped = NetworkAttributeFactory.AddNetworkAttribute<bool>(Id.ToString(), false);
     }
 
 

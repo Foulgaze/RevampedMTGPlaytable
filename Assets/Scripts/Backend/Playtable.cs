@@ -13,11 +13,16 @@ public class Playtable
 	public bool GameStarted {get;set;} = false;
 
 	public event PropertyChangedEventHandler gameStarted = delegate { };
+
+	private CardFactory cardFactory;
+	private NetworkAttributeFactory networkAttributeFactory;
 	
 	public Playtable(NetworkManager networkManager, int readyUpCount)
 	{
 		this._networkManager = networkManager;
 		this.readyUpNeeded = new NetworkAttribute<int>("0",readyUpCount);
+		this.cardFactory = new CardFactory();
+		this.networkAttributeFactory = new NetworkAttributeFactory();
 	}
 
 	/// <summary>
@@ -31,7 +36,7 @@ public class Playtable
 		{
 			return;
 		}
-		Player player = new Player(uuid, name,40);
+		Player player = new Player(uuid, name,40, networkAttributeFactory, cardFactory);
 		player.ReadiedUp.valueChange += CheckForStartGame;
 		_players.Add(player);
 	}
@@ -67,9 +72,9 @@ public class Playtable
 		foreach(Player player in _players)
 		{
 			(List<string> cardNames, _) = CardParser.ParseDeckList(player.DeckListRaw.Value);
-			CardContainer library = player.GetCardContainer(CardZone.Library);
-			List<Card> cards = CardManager.LoadCardNames(cardNames);
-			cards.ForEach(card => library.AddCardToContainer(card, null,false));
+			CardContainerCollection library = player.GetCardContainer(CardZone.Library);
+			List<Card> cards = cardFactory.LoadCardNames(cardNames);
+			cards.ForEach(card => library.InsertCardIntoContainer(0,true,card,null,false));
 		}
 	}
 

@@ -32,7 +32,7 @@ public class NetworkAttribute<T>
 	{
 		this.value = value;
 		this.changeHasBeenNetworked = false;
-		this.valueChange(this, new PropertyChangedEventArgs("NonNetworkChange"));
+		this.valueChange(value, new PropertyChangedEventArgs("NonNetworkChange"));
 	}
 	
 }
