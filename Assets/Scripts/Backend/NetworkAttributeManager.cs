@@ -19,17 +19,17 @@ public class GenericDictionary
     }
 }
 
-public static class NetworkAttributeManager
+public class NetworkAttributeFactory
 {
-	public static event PropertyChangedEventHandler valueChanged = delegate {};
-	private static GenericDictionary networkAttributes = new GenericDictionary();
-	private static int _id = 0;
+	public event PropertyChangedEventHandler valueChanged = delegate {};
+	private GenericDictionary networkAttributes = new GenericDictionary();
+	private int _id = 0;
 
-    static void AttributeChangedEventHandler(object sender, PropertyChangedEventArgs e)
+    private void AttributeChangedEventHandler(object sender, PropertyChangedEventArgs e)
     {
         valueChanged(sender, e);
     }
-	public static NetworkAttribute<T> AddNetworkAttribute<T>(string uuid, T value)
+	public NetworkAttribute<T> AddNetworkAttribute<T>(string uuid, T value)
 	{
         string newID = $"{uuid}-{_id++}";
 		NetworkAttribute<T> newAttribute = new NetworkAttribute<T>(newID, value);

@@ -274,7 +274,7 @@ public class GameManager : MonoBehaviour
             Debug.LogError($"Cannot find player - {uuid}");
             return;
         }
-        Card copiedCard = CardManager.CopyCard(idToCard[id]);
+        Card copiedCard = CardFactory.CopyCard(idToCard[id]);
         InsertCardNextToCard(uuid, copiedCard, id);
     }
 
@@ -404,7 +404,7 @@ public class GameManager : MonoBehaviour
                     cardNames.Add(cardName);
                 }
             }
-            CardManager.LoadDeck(cardNames, player.library);
+            CardFactory.LoadDeck(cardNames, player.library);
         }
     }
 
@@ -632,7 +632,7 @@ public class GameManager : MonoBehaviour
             return;
         }
 
-        Card? relatedCard = CardManager.CreateRelatedCard(parts[1]);
+        Card? relatedCard = CardFactory.CreateRelatedCard(parts[1]);
         if(relatedCard == null)
         {
             Debug.LogError($"Cannot find card {parts[1]}");
